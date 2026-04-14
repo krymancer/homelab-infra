@@ -9,3 +9,4 @@ terraform/terraform.tfvars
 *.pem
 *.key
 id_rsa*
+k8s/apps/discord-bot/secret.yaml
