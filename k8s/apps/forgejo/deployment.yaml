@@ -35,6 +35,10 @@ spec:
               value: "30022"
             - name: FORGEJO__server__SSH_LISTEN_PORT
               value: "22"
+            - name: FORGEJO__actions__ENABLED
+              value: "true"
+            - name: FORGEJO__actions__DEFAULT_ACTIONS_URL
+              value: "http://forgejo.forgejo.svc.cluster.local:3000"
           resources:
             requests:
               memory: 256Mi

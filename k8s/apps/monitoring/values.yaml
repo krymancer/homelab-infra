@@ -1,0 +1,32 @@
+grafana:
+  adminPassword: admin
+  service:
+    type: NodePort
+    nodePort: 30900
+  persistence:
+    enabled: true
+    storageClassName: local-path
+    size: 5Gi
+
+prometheus:
+  service:
+    type: NodePort
+    nodePort: 30901
+  prometheusSpec:
+    retention: 15d
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+alertmanager:
+  enabled: false
+
+prometheusOperator:
+  admissionWebhooks:
+    certManager:
+      enabled: false
