@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: pihole
+  labels:
+    app: pihole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      containers:
+        - name: pihole
+          image: pihole/pihole:latest
+          env:
+            - name: TZ
+              value: "America/Sao_Paulo"
+            - name: WEBPASSWORD
+              value: "admin"
+            - name: FTLCONF_dns_upstreams
+              value: "1.1.1.1;9.9.9.9"
+          ports:
+            - containerPort: 53
+              protocol: TCP
+            - containerPort: 53
+              protocol: UDP
+            - containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: etc
+              mountPath: /etc/pihole
+            - name: dnsmasq
+              mountPath: /etc/dnsmasq.d
+            - name: custom-dns
+              mountPath: /etc/pihole/custom.list
+              subPath: custom.list
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 250m
+      volumes:
+        - name: etc
+          persistentVolumeClaim:
+            claimName: pihole-etc
+        - name: dnsmasq
+          persistentVolumeClaim:
+            claimName: pihole-dnsmasq
+        - name: custom-dns
+          configMap:
+            name: pihole-custom-dns

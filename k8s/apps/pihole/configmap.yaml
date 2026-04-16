@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-custom-dns
+  namespace: pihole
+data:
+  custom.list: |
+    192.168.0.10 pve.lan
+    192.168.0.20 forgejo.lan
+    192.168.0.20 argocd.lan
+    192.168.0.20 grafana.lan
+    192.168.0.20 prometheus.lan
+    192.168.0.20 pihole.lan
+    192.168.0.20 forgejo.homelab.krymancer.dev
+    192.168.0.20 argocd.homelab.krymancer.dev
+    192.168.0.20 grafana.homelab.krymancer.dev
+    192.168.0.20 prometheus.homelab.krymancer.dev
+    192.168.0.20 pihole.homelab.krymancer.dev
