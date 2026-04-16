@@ -30,7 +30,7 @@ spec:
               mountPath: /data
           env:
             - name: FORGEJO__server__ROOT_URL
-              value: "https://forgejo.homelab.krymancer.dev"
+              value: "https://forgejo.krymancer.dev"
             - name: FORGEJO__server__SSH_PORT
               value: "30022"
             - name: FORGEJO__server__SSH_LISTEN_PORT
