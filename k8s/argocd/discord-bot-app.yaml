@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: http://forgejo.forgejo.svc.cluster.local:3000/krymancer/cleitinrasta-discord-bot.git
+    repoURL: https://github.com/krymancer/cleitinrasta-discord-bot-dotnet.git
     targetRevision: main
     path: k8s
   destination:
