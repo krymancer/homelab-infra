@@ -56,3 +56,35 @@ variable "ci_password" {
   type        = string
   sensitive   = true
 }
+
+variable "tailscale_auth_key" {
+  description = "Tailscale pre-auth key (tskey-auth-...). Create at login.tailscale.com/admin/settings/keys."
+  type        = string
+  sensitive   = true
+}
+
+variable "dev_lxc" {
+  description = "Dev LXC container configuration"
+  type = object({
+    vmid     = number
+    name     = string
+    cores    = number
+    memory   = number
+    disk     = string
+    storage  = string
+    ip       = string
+    gateway  = string
+    template = string
+  })
+  default = {
+    vmid     = 201
+    name     = "dev"
+    cores    = 2
+    memory   = 2048
+    disk     = "20G"
+    storage  = "local-lvm"
+    ip       = "192.168.0.21/24"
+    gateway  = "192.168.0.1"
+    template = "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
+  }
+}

@@ -18,3 +18,22 @@ k3s_vm = {
   ip      = "192.168.0.20/24"
   gateway = "192.168.0.1" # your router IP
 }
+
+# Tailscale pre-auth key. Create one-off at:
+#   https://login.tailscale.com/admin/settings/keys
+# Recommended: reusable=false, ephemeral=false, expiry 24h, tag:dev
+tailscale_auth_key = "tskey-auth-XXXXXXXXXXXX"
+
+dev_lxc = {
+  vmid     = 201
+  name     = "dev"
+  cores    = 2
+  memory   = 2048
+  disk     = "20G"
+  storage  = "local-lvm"
+  ip       = "192.168.0.21/24"
+  gateway  = "192.168.0.1"
+  # Run `pveam list local` on PVE to confirm exact filename.
+  # Download if missing: `pveam update && pveam download local debian-12-standard_12.7-1_amd64.tar.zst`
+  template = "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
+}
