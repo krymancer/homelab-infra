@@ -27,13 +27,13 @@ tailscale_auth_key = "tskey-auth-XXXXXXXXXXXX"
 dev_lxc = {
   vmid     = 201
   name     = "dev"
-  cores    = 2
-  memory   = 2048
-  disk     = "20G"
+  cores    = 8
+  memory   = 8192
+  disk     = "90G"
   storage  = "local-lvm"
   ip       = "192.168.0.21/24"
   gateway  = "192.168.0.1"
   # Run `pveam list local` on PVE to confirm exact filename.
-  # Download if missing: `pveam update && pveam download local debian-12-standard_12.7-1_amd64.tar.zst`
-  template = "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
+  # Download if missing: `pveam update && pveam download local archlinux-base_20260420-1_amd64.tar.zst`
+  template = "local:vztmpl/archlinux-base_20260420-1_amd64.tar.zst"
 }

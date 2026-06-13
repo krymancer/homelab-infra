@@ -79,12 +79,12 @@ variable "dev_lxc" {
   default = {
     vmid     = 201
     name     = "dev"
-    cores    = 2
-    memory   = 2048
-    disk     = "20G"
+    cores    = 8
+    memory   = 8192
+    disk     = "90G"
     storage  = "local-lvm"
     ip       = "192.168.0.21/24"
     gateway  = "192.168.0.1"
-    template = "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
+    template = "local:vztmpl/archlinux-base_20260420-1_amd64.tar.zst"
   }
 }
