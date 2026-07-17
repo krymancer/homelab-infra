@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ntfy
+  namespace: ntfy
+spec:
+  tls:
+    - hosts:
+        - ntfy.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: ntfy.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ntfy
+                port:
+                  number: 80
