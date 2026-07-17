@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: homepage
+data:
+  settings.yaml: |
+    title: Homelab
+    headerStyle: clean
+    statusStyle: dot
+    hideVersion: true
+  kubernetes.yaml: |
+    mode: cluster
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: k3s
+        nodes:
+          show: false
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          dateStyle: long
+  services.yaml: |
+    - Media:
+        - AIOStreams:
+            href: https://aio.homelab.krymancer.dev
+            description: Stremio addon manager
+            icon: sh-aiostreams
+            siteMonitor: http://aiostreams.aiostreams.svc.cluster.local:3000
+        - MediaFlow Proxy:
+            href: https://flow.homelab.krymancer.dev
+            description: Debrid proxy
+            icon: mdi-swap-horizontal
+            siteMonitor: http://mediaflow-proxy.aiostreams.svc.cluster.local:8888
+        - Cobalt:
+            href: https://cobalt.homelab.krymancer.dev
+            description: Media downloader
+            icon: sh-cobalt
+            siteMonitor: http://cobalt-web.cobalt.svc.cluster.local:8080
+        - AIOMetadata:
+            href: https://meta.homelab.krymancer.dev/configure
+            description: Stremio metadata addon
+            icon: mdi-movie-search
+            siteMonitor: http://aiometadata.aiometadata.svc.cluster.local:3232/health
+    - Games:
+        - Minecraft:
+            description: "LAN: mc.homelab.krymancer.dev - friends: foundation-burning.gl.joinmc.link"
+            icon: sh-minecraft
+    - Infra:
+        - Proxmox:
+            href: https://pve.homelab.krymancer.dev
+            description: Hypervisor
+            icon: proxmox
+        - ArgoCD:
+            href: https://argocd.homelab.krymancer.dev
+            description: GitOps
+            icon: argo-cd
+            siteMonitor: http://argocd-server.argocd.svc.cluster.local:80
+        - Forgejo:
+            href: https://forgejo.homelab.krymancer.dev
+            description: Git server
+            icon: forgejo
+            siteMonitor: http://forgejo.forgejo.svc.cluster.local:3000
+        - Pi-hole:
+            href: https://pihole.homelab.krymancer.dev/admin/
+            description: DNS + ad blocking
+            icon: pi-hole
+            siteMonitor: http://pihole-web.pihole.svc.cluster.local:80/admin/
+    - Monitoring:
+        - Grafana:
+            href: https://grafana.homelab.krymancer.dev
+            description: Dashboards
+            icon: grafana
+            siteMonitor: http://kube-prom-grafana.monitoring.svc.cluster.local:80
+        - Prometheus:
+            href: https://prometheus.homelab.krymancer.dev
+            description: Metrics
+            icon: prometheus
+            siteMonitor: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+    - Tools:
+        - Vaultwarden:
+            href: https://vault.homelab.krymancer.dev
+            description: Password manager
+            icon: vaultwarden
+            siteMonitor: http://vaultwarden.vaultwarden.svc.cluster.local:80
+        - Uptime Kuma:
+            href: https://uptime.homelab.krymancer.dev
+            description: Uptime monitoring
+            icon: uptime-kuma
+            siteMonitor: http://uptime-kuma.uptime-kuma.svc.cluster.local:3001
+        - ntfy:
+            href: https://ntfy.homelab.krymancer.dev
+            description: Push notifications
+            icon: ntfy
+            siteMonitor: http://ntfy.ntfy.svc.cluster.local:80
+        - IT-Tools:
+            href: https://tools.homelab.krymancer.dev
+            description: Dev toolbox
+            icon: it-tools
+            siteMonitor: http://it-tools.it-tools.svc.cluster.local:80
+    - Apps:
+        - Job Applications:
+            href: https://jobs.homelab.krymancer.dev
+            description: Job tracker
+            icon: mdi-briefcase
+            siteMonitor: http://job-applications.default.svc.cluster.local:8765
+        - Hermes:
+            href: https://hermes.homelab.krymancer.dev
+            description: Dashboard
+            icon: mdi-chart-box
+            siteMonitor: http://hermes-dashboard.default.svc.cluster.local:9119
+  bookmarks.yaml: |
+    []
+  docker.yaml: ""
