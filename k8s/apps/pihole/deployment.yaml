@@ -40,7 +40,7 @@ spec:
             - name: dnsmasq
               mountPath: /etc/dnsmasq.d
             - name: custom-dns
-              mountPath: /etc/pihole/custom.list
+              mountPath: /etc/pihole/hosts/custom.list
               subPath: custom.list
           resources:
             requests:
