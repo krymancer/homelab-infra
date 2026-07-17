@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-applications
+  namespace: default
+spec:
+  ports:
+    - name: http
+      port: 8765
+      targetPort: 8765
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: job-applications
+  namespace: default
+subsets:
+  - addresses:
+      - ip: 192.168.0.21
+    ports:
+      - name: http
+        port: 8765
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: job-applications
+  namespace: default
+spec:
+  tls:
+    - hosts:
+        - jobs.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: jobs.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: job-applications
+                port:
+                  number: 8765

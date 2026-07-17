@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hermes-dashboard
+  namespace: default
+spec:
+  ports:
+    - name: http
+      port: 9119
+      targetPort: 9119
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: hermes-dashboard
+  namespace: default
+subsets:
+  - addresses:
+      - ip: 192.168.0.21
+    ports:
+      - name: http
+        port: 9119
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes-dashboard
+  namespace: default
+spec:
+  tls:
+    - hosts:
+        - hermes.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: hermes.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hermes-dashboard
+                port:
+                  number: 9119
