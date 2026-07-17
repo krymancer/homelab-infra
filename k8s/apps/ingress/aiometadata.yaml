@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aiometadata
+  namespace: aiometadata
+spec:
+  tls:
+    - hosts:
+        - meta.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: meta.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aiometadata
+                port:
+                  number: 3232
