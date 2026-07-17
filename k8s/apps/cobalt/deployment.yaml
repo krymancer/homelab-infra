@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cobalt
+  namespace: cobalt
+  labels:
+    app: cobalt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cobalt
+  template:
+    metadata:
+      labels:
+        app: cobalt
+    spec:
+      containers:
+        - name: cobalt
+          image: ghcr.io/imputnet/cobalt:11
+          env:
+            - name: API_URL
+              value: "https://cobalt-api.homelab.krymancer.dev/"
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 500m

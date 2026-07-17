@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cobalt-web-static
+  namespace: cobalt
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cobalt-web-nginx
+  namespace: cobalt
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      root /usr/share/nginx/html;
+      index index.html;
+      location / {
+        try_files $uri $uri.html $uri/index.html /404.html;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cobalt-web
+  namespace: cobalt
+  labels:
+    app: cobalt-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cobalt-web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: cobalt-web
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: static
+              mountPath: /usr/share/nginx/html
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 25m
+            limits:
+              memory: 128Mi
+              cpu: 250m
+      volumes:
+        - name: static
+          persistentVolumeClaim:
+            claimName: cobalt-web-static
+        - name: nginx-conf
+          configMap:
+            name: cobalt-web-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cobalt-web
+  namespace: cobalt
+spec:
+  type: ClusterIP
+  selector:
+    app: cobalt-web
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
