@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mediaflow-proxy
+  namespace: aiostreams
+  labels:
+    app: mediaflow-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mediaflow-proxy
+  template:
+    metadata:
+      labels:
+        app: mediaflow-proxy
+    spec:
+      containers:
+        - name: mediaflow-proxy
+          image: mhdzumair/mediaflow-proxy:latest
+          env:
+            - name: API_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aiostreams-secrets
+                  key: mediaflow-password
+          ports:
+            - containerPort: 8888
+              protocol: TCP
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 1000m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mediaflow-proxy
+  namespace: aiostreams
+spec:
+  selector:
+    app: mediaflow-proxy
+  ports:
+    - port: 8888
+      targetPort: 8888
+      protocol: TCP

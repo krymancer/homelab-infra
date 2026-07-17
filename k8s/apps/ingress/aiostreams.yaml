@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+spec:
+  tls:
+    - hosts:
+        - aio.homelab.krymancer.dev
+        - flow.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: aio.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aiostreams
+                port:
+                  number: 3000
+    - host: flow.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mediaflow-proxy
+                port:
+                  number: 8888

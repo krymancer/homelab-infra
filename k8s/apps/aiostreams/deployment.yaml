@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+  labels:
+    app: aiostreams
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: aiostreams
+  template:
+    metadata:
+      labels:
+        app: aiostreams
+    spec:
+      containers:
+        - name: aiostreams
+          image: ghcr.io/viren070/aiostreams:latest
+          env:
+            - name: BASE_URL
+              value: "https://aio.homelab.krymancer.dev"
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aiostreams-secrets
+                  key: secret-key
+            - name: AIOSTREAMS_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: aiostreams-secrets
+                  key: auth
+            - name: AIOSTREAMS_AUTH_PERMISSIONS
+              value: "junho=admin"
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 1Gi
+              cpu: 1000m
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: aiostreams-data
