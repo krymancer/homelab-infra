@@ -4,8 +4,22 @@ metadata:
   name: pihole
   namespace: pihole
 spec:
+  tls:
+    - hosts:
+        - pihole.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
   rules:
     - host: pihole.lan
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pihole-web
+                port:
+                  number: 80
+    - host: pihole.homelab.krymancer.dev
       http:
         paths:
           - path: /

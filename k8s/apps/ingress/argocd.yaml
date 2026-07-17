@@ -4,8 +4,22 @@ metadata:
   name: argocd
   namespace: argocd
 spec:
+  tls:
+    - hosts:
+        - argocd.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
   rules:
     - host: argocd.lan
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+    - host: argocd.homelab.krymancer.dev
       http:
         paths:
           - path: /

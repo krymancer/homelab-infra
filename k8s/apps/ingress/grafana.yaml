@@ -4,8 +4,22 @@ metadata:
   name: grafana
   namespace: monitoring
 spec:
+  tls:
+    - hosts:
+        - grafana.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
   rules:
     - host: grafana.lan
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kube-prom-grafana
+                port:
+                  number: 80
+    - host: grafana.homelab.krymancer.dev
       http:
         paths:
           - path: /
