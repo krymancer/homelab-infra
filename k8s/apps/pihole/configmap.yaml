@@ -16,3 +16,17 @@ data:
     192.168.0.20 grafana.homelab.krymancer.dev
     192.168.0.20 prometheus.homelab.krymancer.dev
     192.168.0.20 pihole.homelab.krymancer.dev
+    192.168.0.20 cobalt.homelab.krymancer.dev
+    192.168.0.20 cobalt-api.homelab.krymancer.dev
+    192.168.0.20 aio.homelab.krymancer.dev
+    192.168.0.20 flow.homelab.krymancer.dev
+    192.168.0.20 mc.homelab.krymancer.dev
+    192.168.0.20 pve.homelab.krymancer.dev
+    192.168.0.20 jobs.homelab.krymancer.dev
+    192.168.0.20 hermes.homelab.krymancer.dev
+    192.168.0.20 home.homelab.krymancer.dev
+    192.168.0.20 vault.homelab.krymancer.dev
+    192.168.0.20 uptime.homelab.krymancer.dev
+    192.168.0.20 ntfy.homelab.krymancer.dev
+    192.168.0.20 tools.homelab.krymancer.dev
+    192.168.0.20 meta.homelab.krymancer.dev
