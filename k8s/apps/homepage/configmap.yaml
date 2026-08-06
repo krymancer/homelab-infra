@@ -48,10 +48,6 @@ data:
             description: Stremio metadata addon
             icon: mdi-movie-search
             siteMonitor: http://aiometadata.aiometadata.svc.cluster.local:3232/health
-    - Games:
-        - Minecraft:
-            description: "LAN: mc.homelab.krymancer.dev - friends: foundation-burning.gl.joinmc.link"
-            icon: sh-minecraft
     - Infra:
         - Proxmox:
             href: https://pve.homelab.krymancer.dev
