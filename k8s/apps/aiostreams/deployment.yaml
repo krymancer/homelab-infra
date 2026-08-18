@@ -35,6 +35,21 @@ spec:
                   key: auth
             - name: AIOSTREAMS_AUTH_PERMISSIONS
               value: "junho=admin"
+            # Force playback through the in-cluster MediaFlow proxy so debrid
+            # link creation and playback share the homelab's public IP.
+            - name: FORCE_PROXY_ENABLED
+              value: "true"
+            - name: FORCE_PROXY_ID
+              value: "mediaflow"
+            - name: FORCE_PROXY_URL
+              value: "http://mediaflow-proxy.aiostreams.svc.cluster.local:8888"
+            - name: FORCE_PROXY_PUBLIC_URL
+              value: "https://flow.homelab.krymancer.dev"
+            - name: FORCE_PROXY_CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: aiostreams-secrets
+                  key: mediaflow-password
           ports:
             - containerPort: 3000
               protocol: TCP

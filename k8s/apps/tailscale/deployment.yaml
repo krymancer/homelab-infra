@@ -21,6 +21,11 @@ spec:
         - name: tailscale
           image: tailscale/tailscale:stable
           env:
+            - name: TS_AUTHKEY
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-auth
+                  key: TS_AUTHKEY
             - name: TS_HOSTNAME
               value: "homelab"
             - name: TS_ROUTES
