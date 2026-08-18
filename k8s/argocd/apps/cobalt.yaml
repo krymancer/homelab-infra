@@ -12,3 +12,7 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: cobalt
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

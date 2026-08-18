@@ -12,3 +12,7 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: tailscale
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
