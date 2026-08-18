@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: uptime-kuma
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/krymancer/homelab-infra.git
+    targetRevision: main
+    path: k8s/apps/uptime-kuma
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: uptime-kuma

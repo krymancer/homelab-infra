@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ntfy
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/krymancer/homelab-infra.git
+    targetRevision: main
+    path: k8s/apps/ntfy
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ntfy
