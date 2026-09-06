@@ -27,3 +27,18 @@ output "dev_ssh_tailscale" {
   description = "SSH via Tailscale MagicDNS (after first connect)"
   value       = "ssh ${var.ci_user}@${var.dev_lxc.name}"
 }
+
+output "gpu_vm_enabled" {
+  description = "Whether the alt GPU passthrough VM is managed by Terraform"
+  value       = var.enable_gpu_vm
+}
+
+output "gpu_vm_id" {
+  description = "VMID of the GPU passthrough VM (null while enable_gpu_vm is false)"
+  value       = var.enable_gpu_vm ? proxmox_virtual_environment_vm.gpu[0].vm_id : null
+}
+
+output "gpu_vm_node" {
+  description = "Proxmox node for the GPU passthrough VM"
+  value       = var.alt_node_name
+}

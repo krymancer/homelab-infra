@@ -16,6 +16,44 @@ variable "proxmox_api_token_secret" {
   sensitive   = true
 }
 
+variable "proxmox_alt_api_url" {
+  description = "Proxmox API URL for the standalone alt host (not clustered with pve)"
+  type        = string
+  default     = "https://192.168.0.11:8006"
+}
+
+variable "proxmox_alt_api_token_id" {
+  description = "API token ID on alt (e.g. terraform@pam!terraform). Required to manage alt resources."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "proxmox_alt_api_token_secret" {
+  description = "API token secret for alt. Create on alt; do not reuse the pve token."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "k3s_node_name" {
+  description = "Proxmox node that owns the k3s VM. Keep pve until alt has 32 GiB RAM."
+  type        = string
+  default     = "pve"
+}
+
+variable "dev_node_name" {
+  description = "Proxmox node that owns the dev LXC. Keep pve until alt has 32 GiB RAM."
+  type        = string
+  default     = "pve"
+}
+
+variable "alt_node_name" {
+  description = "Proxmox node name of the second host (hostname, not FQDN)"
+  type        = string
+  default     = "alt"
+}
+
 variable "k3s_vm" {
   description = "K3s VM configuration"
   type = object({
@@ -86,5 +124,41 @@ variable "dev_lxc" {
     ip       = "192.168.0.21/24"
     gateway  = "192.168.0.1"
     template = "local:vztmpl/archlinux-base_20260420-1_amd64.tar.zst"
+  }
+}
+
+variable "enable_gpu_vm" {
+  description = "Create the RTX 2060 passthrough VM on alt. Leave false while alt has 8 GiB RAM."
+  type        = bool
+  default     = false
+}
+
+variable "gpu_vm_started" {
+  description = "Whether Terraform should start the GPU VM. Must stay false on 8 GiB host RAM."
+  type        = bool
+  default     = false
+}
+
+variable "gpu_vm" {
+  description = "Placeholder GPU passthrough VM on alt. Do not start until alt has 32 GiB RAM."
+  type = object({
+    vmid    = number
+    name    = string
+    cores   = number
+    memory  = number
+    disk    = string
+    storage = string
+    ip      = string
+    gateway = string
+  })
+  default = {
+    vmid    = 300
+    name    = "gpu"
+    cores   = 4
+    memory  = 8192
+    disk    = "64G"
+    storage = "local-lvm"
+    ip      = "192.168.0.30/24"
+    gateway = "192.168.0.1"
   }
 }

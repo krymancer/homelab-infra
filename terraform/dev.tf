@@ -1,5 +1,5 @@
 resource "proxmox_virtual_environment_container" "dev" {
-  node_name = "pve"
+  node_name = var.dev_node_name
   vm_id     = var.dev_lxc.vmid
 
   description = "Dev box: claude code, codex, repo clones. Tailscale-attached."
