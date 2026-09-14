@@ -58,11 +58,6 @@ data:
             description: GitOps
             icon: argo-cd
             siteMonitor: http://argocd-server.argocd.svc.cluster.local:80
-        - Forgejo:
-            href: https://forgejo.homelab.krymancer.dev
-            description: Git server
-            icon: forgejo
-            siteMonitor: http://forgejo.forgejo.svc.cluster.local:3000
         - Pi-hole:
             href: https://pihole.homelab.krymancer.dev/admin/
             description: DNS + ad blocking

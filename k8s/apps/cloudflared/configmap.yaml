@@ -9,8 +9,6 @@ data:
     credentials-file: /etc/cloudflared/credentials.json
     no-autoupdate: true
     ingress:
-      - hostname: forgejo.krymancer.dev
-        service: http://forgejo.forgejo.svc.cluster.local:3000
       - hostname: grafana.krymancer.dev
         service: http://kube-prom-grafana.monitoring.svc.cluster.local:80
       - hostname: argocd.krymancer.dev
