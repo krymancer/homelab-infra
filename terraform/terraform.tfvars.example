@@ -1,8 +1,17 @@
 # Copy this to terraform.tfvars and fill in your values
 # terraform.tfvars is gitignored — never commit it
 
+# --- pve (Dell G15, 192.168.0.10) ---
+# proxmox_api_url defaults to https://192.168.0.10:8006
 proxmox_api_token_id     = "terraform@pam!terraform"
 proxmox_api_token_secret = "your-token-secret-here"
+
+# --- alt (standalone host, 192.168.0.11) ---
+# proxmox_alt_api_url defaults to https://192.168.0.11:8006
+# Leave the alt token vars empty to reuse proxmox_api_token_* (same id/secret
+# string). Prefer creating a matching terraform@pam!terraform token on alt.
+# proxmox_alt_api_token_id     = "terraform@pam!terraform"
+# proxmox_alt_api_token_secret = "your-alt-token-secret-here"
 
 ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7Q95691WXu2MwzknbezIzUMNuL7bd8cP9sGfe5u+Ec "
 
@@ -36,4 +45,18 @@ dev_lxc = {
   # Run `pveam list local` on PVE to confirm exact filename.
   # Download if missing: `pveam update && pveam download local archlinux-base_20260420-1_amd64.tar.zst`
   template = "local:vztmpl/archlinux-base_20260420-1_amd64.tar.zst"
+}
+
+hermes_lxc = {
+  vmid     = 210
+  name     = "hermes"
+  cores    = 2
+  memory   = 2048
+  disk     = "16G"
+  storage  = "ssd" # zfspool on alt
+  ip       = "192.168.0.22/24"
+  gateway  = "192.168.0.1"
+  # On alt, confirm exact filename: `pveam list local`
+  # Download if missing: `pveam update && pveam download local debian-13-standard`
+  template = "local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst"
 }
