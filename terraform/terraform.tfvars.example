@@ -32,7 +32,13 @@ k3s_vm = {
 # Staging k3s on alt (VMID 220, 192.168.0.23). Keep started=false until Ubuntu
 # cloud-init template VMID 9000 exists on alt. Cutover later may move services
 # here and reassign 192.168.0.20. Guest name/hostname is k3s (TF resource stays k3s_alt).
-k3s_alt_started = false
+# From-scratch: set k3s_alt_started = true, apply twice (k3s then Helm Argo).
+# Existing VM 220 is not replaced; cloud-init k3s install needs -replace (see README).
+k3s_alt_started          = false
+k3s_alt_bootstrap_argocd = true
+argocd_sync_cutover_apps = false
+# Optional GitHub PAT for Argo (private repos / rate limits). Leave empty if public.
+# argocd_git_token = "github_pat_XXXXXXXX"
 k3s_alt_vm = {
   vmid     = 220
   name     = "k3s"

@@ -1,3 +1,6 @@
+# Pins Service loadBalancerIP 192.168.0.20 (live DNS). Staging Argo excludes
+# this file until cutover (argocd_sync_cutover_apps). Do not sync onto VM 220
+# while production k3s still owns .20.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

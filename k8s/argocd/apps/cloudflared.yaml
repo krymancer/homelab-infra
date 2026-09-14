@@ -1,3 +1,5 @@
+# Uses the production tunnel UUID. Staging Argo excludes this file until
+# cutover so a parallel cluster does not steal public hostnames.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
