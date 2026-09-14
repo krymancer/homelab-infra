@@ -9,6 +9,16 @@ terraform {
   }
 }
 
+locals {
+  # Reuse pve token vars when alt-specific ones are unset. Create a matching
+  # terraform@pam!terraform token on alt, or set proxmox_alt_api_token_*.
+  proxmox_alt_api_token_id     = var.proxmox_alt_api_token_id != "" ? var.proxmox_alt_api_token_id : var.proxmox_api_token_id
+  proxmox_alt_api_token_secret = var.proxmox_alt_api_token_secret != "" ? var.proxmox_alt_api_token_secret : var.proxmox_api_token_secret
+}
+
+# Default provider: Dell G15 / hostname `pve` (192.168.0.10).
+# Existing k3s + dev resources stay on this instance; do not attach an explicit
+# `provider` meta-argument to them or Terraform will treat that as a move.
 provider "proxmox" {
   endpoint  = var.proxmox_api_url
   api_token = "${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
@@ -16,6 +26,24 @@ provider "proxmox" {
 
   ssh {
     agent = true
+  }
+}
+
+# Standalone second host (not clustered with pve). Pass `provider = proxmox.alt`
+# on alt guests. Token vars fall back to the pve token when unset.
+provider "proxmox" {
+  alias     = "alt"
+  endpoint  = var.proxmox_alt_api_url
+  api_token = "${local.proxmox_alt_api_token_id}=${local.proxmox_alt_api_token_secret}"
+  insecure  = true
+
+  ssh {
+    agent = true
+
+    node {
+      name    = var.alt_node_name
+      address = regex("^https?://([^:/]+)", var.proxmox_alt_api_url)[0]
+    }
   }
 }
 
