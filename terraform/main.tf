@@ -47,6 +47,10 @@ provider "proxmox" {
   }
 }
 
+# Production k3s on pve (VMID 200, 192.168.0.20). Leave this resource on the
+# default provider — an explicit `provider` meta-argument would look like a move
+# and could destroy the live cluster. Cutover later may move services to
+# proxmox_virtual_environment_vm.k3s_alt and reassign .20.
 resource "proxmox_virtual_environment_vm" "k3s" {
   name      = var.k3s_vm.name
   node_name = "pve"

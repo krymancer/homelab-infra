@@ -43,7 +43,7 @@ variable "alt_node_name" {
 }
 
 variable "k3s_vm" {
-  description = "K3s VM configuration"
+  description = "Production k3s VM on pve. Leave as-is until cutover; .20 stays on this guest."
   type = object({
     vmid    = number
     name    = string
@@ -63,6 +63,70 @@ variable "k3s_vm" {
     storage = "local-lvm"
     ip      = "192.168.0.20/24"
     gateway = "192.168.0.1"
+  }
+}
+
+variable "k3s_alt_vm" {
+  description = "Staging k3s VM on alt. Cutover later may move services from pve VM 200 and reassign 192.168.0.20."
+  type = object({
+    vmid     = number
+    name     = string
+    cores    = number
+    memory   = number
+    disk     = string
+    storage  = string
+    ip       = string
+    gateway  = string
+    template = number
+  })
+  default = {
+    vmid     = 220
+    name     = "k3s-alt"
+    cores    = 8
+    memory   = 16384
+    disk     = "120G"
+    storage  = "ssd"
+    ip       = "192.168.0.23/24"
+    gateway  = "192.168.0.1"
+    template = 9000
+  }
+}
+
+variable "k3s_alt_started" {
+  description = "Start the staging k3s VM on alt. Keep false until Ubuntu cloud template 9000 exists on alt and you are ready to boot."
+  type        = bool
+  default     = false
+}
+
+variable "enable_gpu_vm" {
+  description = "Create the RTX 2060 passthrough VM on alt. Leave false until k3s-alt RAM headroom is confirmed."
+  type        = bool
+  default     = false
+}
+
+variable "gpu_vm_started" {
+  description = "Whether Terraform should start the GPU VM. Must stay false unless enable_gpu_vm is true and you intend to boot it."
+  type        = bool
+  default     = false
+}
+
+variable "gpu_vm" {
+  description = "Placeholder GPU passthrough VM on alt (count=0 unless enable_gpu_vm)."
+  type = object({
+    vmid    = number
+    name    = string
+    cores   = number
+    memory  = number
+    disk    = string
+    storage = string
+  })
+  default = {
+    vmid    = 300
+    name    = "gpu"
+    cores   = 4
+    memory  = 8192
+    disk    = "64G"
+    storage = "ssd"
   }
 }
 

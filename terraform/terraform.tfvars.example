@@ -17,6 +17,7 @@ ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7Q95691WXu2MwzknbezIzUMN
 
 ci_password = "*vBsHTU13$YfBvU^f5x4YT3m"
 
+# Production k3s on pve — do not change until cutover.
 k3s_vm = {
   vmid    = 200
   name    = "k3s"
@@ -26,6 +27,22 @@ k3s_vm = {
   storage = "local-lvm"   # check your Proxmox storage name
   ip      = "192.168.0.20/24"
   gateway = "192.168.0.1" # your router IP
+}
+
+# Staging k3s on alt (VMID 220, 192.168.0.23). Keep started=false until Ubuntu
+# cloud-init template VMID 9000 exists on alt. Cutover later may move services
+# here and reassign 192.168.0.20; hostname stays k3s-alt until then.
+k3s_alt_started = false
+k3s_alt_vm = {
+  vmid     = 220
+  name     = "k3s-alt"
+  cores    = 8
+  memory   = 16384 # leave room on 32G for hermes + host
+  disk     = "120G"
+  storage  = "ssd"
+  ip       = "192.168.0.23/24"
+  gateway  = "192.168.0.1"
+  template = 9000
 }
 
 # Tailscale pre-auth key. Create one-off at:
@@ -46,3 +63,19 @@ hermes_lxc = {
   # Download if missing: `pveam update && pveam download local debian-13-standard`
   template = "local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst"
 }
+
+# GPU passthrough VM on alt. Off by default (no mappings, no VM).
+# After VFIO host prep (see terraform/README.md) and k3s-alt RAM headroom:
+#   1. enable_gpu_vm = true   → creates a STOPPED VM + PCI mappings
+#   2. gpu_vm_started = true  → only when you are ready to boot it
+enable_gpu_vm  = false
+gpu_vm_started = false
+
+# gpu_vm = {
+#   vmid    = 300
+#   name    = "gpu"
+#   cores   = 4
+#   memory  = 8192
+#   disk    = "64G"
+#   storage = "ssd"
+# }
