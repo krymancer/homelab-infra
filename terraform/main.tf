@@ -17,7 +17,7 @@ locals {
 }
 
 # Default provider: Dell G15 / hostname `pve` (192.168.0.10).
-# Existing k3s + dev resources stay on this instance; do not attach an explicit
+# Existing k3s resources stay on this instance; do not attach an explicit
 # `provider` meta-argument to them or Terraform will treat that as a move.
 provider "proxmox" {
   endpoint  = var.proxmox_api_url
