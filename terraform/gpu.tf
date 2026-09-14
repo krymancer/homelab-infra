@@ -9,8 +9,8 @@
 # iommu=pt), vfio-pci ids, and the nouveau blacklist stay on the host.
 # bpg/proxmox hostpci.id is incompatible with API tokens, so mappings are used.
 #
-# Leave enable_gpu_vm = false until k3s-alt cutover RAM headroom is confirmed
-# (k3s-alt 16G + hermes 2G on a 32G host).
+# Leave enable_gpu_vm = false until staging k3s cutover RAM headroom is confirmed
+# (k3s 16G + hermes 2G on a 32G host).
 
 resource "proxmox_virtual_environment_hardware_mapping_pci" "rtx2060" {
   provider = proxmox.alt

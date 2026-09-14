@@ -81,7 +81,7 @@ variable "k3s_alt_vm" {
   })
   default = {
     vmid     = 220
-    name     = "k3s-alt"
+    name     = "k3s"
     cores    = 8
     memory   = 16384
     disk     = "120G"
@@ -99,7 +99,7 @@ variable "k3s_alt_started" {
 }
 
 variable "enable_gpu_vm" {
-  description = "Create the RTX 2060 passthrough VM on alt. Leave false until k3s-alt RAM headroom is confirmed."
+  description = "Create the RTX 2060 passthrough VM on alt. Leave false until staging k3s RAM headroom is confirmed."
   type        = bool
   default     = false
 }

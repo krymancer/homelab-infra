@@ -5,7 +5,7 @@ Manages VMs and LXCs on two standalone Proxmox hosts. They are **not** a cluster
 | Host | Role | API | Node name |
 |------|------|-----|-----------|
 | Dell G15 | k3s VM 200 (production), Pi-hole/DNS | `https://192.168.0.10:8006` | `pve` |
-| alt | Debian LXC `hermes` 210; staging k3s-alt VM 220 (stopped) | `https://192.168.0.11:8006` | `alt` |
+| alt | Debian LXC `hermes` 210; staging k3s VM 220 (stopped) | `https://192.168.0.11:8006` | `alt` |
 
 Do not attach `provider = proxmox.alt` (or any explicit provider) to the existing `proxmox_virtual_environment_vm.k3s` resource; that would look like a move and could destroy the live cluster.
 
@@ -42,14 +42,14 @@ If the downloaded filename differs from `debian-13-standard_13.1-2_amd64.tar.zst
 
 ## Staging k3s VM (`alt`)
 
-`proxmox_virtual_environment_vm.k3s_alt` clones Ubuntu cloud-init template **VMID 9000 on alt** into VMID 220 (`k3s-alt`), 8 cores / 16 GiB / 120G on datastore `ssd`, virtio on `vmbr0`, cloud-init user `junho`.
+`proxmox_virtual_environment_vm.k3s_alt` clones Ubuntu cloud-init template **VMID 9000 on alt** into VMID 220 (`k3s`), 8 cores / 16 GiB / 120G on datastore `ssd`, virtio on `vmbr0`, cloud-init user `junho`. The Terraform resource stays `k3s_alt` so it does not collide with production `proxmox_virtual_environment_vm.k3s` on pve; Proxmox VM name and cloud-init hostname are both `k3s`.
 
-| | Production (`k3s` on pve) | Staging (`k3s-alt` on alt) |
+| | Production (`k3s` on pve) | Staging (`k3s` on alt) |
 |--|--|--|
 | Resource | `proxmox_virtual_environment_vm.k3s` | `proxmox_virtual_environment_vm.k3s_alt` |
 | Provider | default (`pve`) | `proxmox.alt` |
 | VMID | 200 | 220 |
-| Hostname | `k3s` | `k3s-alt` (avoids clash until cutover) |
+| Hostname | `k3s` | `k3s` |
 | IP | `192.168.0.20/24` | `192.168.0.23/24` |
 | DNS | (unchanged) | Pi-hole `192.168.0.20` + `1.1.1.1` |
 | Started | live | `started = false`, `on_boot = false` |
@@ -60,7 +60,7 @@ Keep `k3s_alt_started = false` for this prep step. Flip it only when you intend 
 
 ### Cutover (later; not this change)
 
-A later cutover will move cluster services off pve VM 200 onto this guest. That may reassign **192.168.0.20** (Pi-hole/DNS and current k3s) onto alt and drop the `-alt` hostname. Until then, leave production k3s and `.20` on pve so a normal apply does not destroy the live cluster.
+A later cutover will move cluster services off pve VM 200 onto this guest. That may reassign **192.168.0.20** (Pi-hole/DNS and current k3s) onto alt. Until then, leave production k3s and `.20` on pve so a normal apply does not destroy the live cluster.
 
 ## GPU passthrough scaffold (`alt`)
 
@@ -77,4 +77,4 @@ When enabled, Terraform creates Datacenter PCI mappings plus a **stopped** q35 +
 - IOMMU group 28 is clean (those two functions only)
 - Attached via `hostpci.mapping` (`rtx2060`, `rtx2060-audio`) because bpg/proxmox `hostpci.id` is incompatible with API tokens
 
-Host VFIO prep (GRUB `intel_iommu=on iommu=pt`, `vfio-pci` ids `10de:1f03,10de:10f9`, nouveau blacklist) is **not** managed by Terraform. Do not enable this while k3s-alt 16 GiB + hermes are competing for the 32 GiB host unless you have confirmed headroom. The Terraform role needs `Mapping.Audit Mapping.Modify Mapping.Use` for the PCI mappings.
+Host VFIO prep (GRUB `intel_iommu=on iommu=pt`, `vfio-pci` ids `10de:1f03,10de:10f9`, nouveau blacklist) is **not** managed by Terraform. Do not enable this while staging k3s 16 GiB + hermes are competing for the 32 GiB host unless you have confirmed headroom. The Terraform role needs `Mapping.Audit Mapping.Modify Mapping.Use` for the PCI mappings.
