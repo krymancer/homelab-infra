@@ -34,7 +34,7 @@ output "hermes_ssh_tailscale" {
 }
 
 output "k3s_alt_ip" {
-  description = "Staging IP of k3s-alt on alt (production k3s stays on 192.168.0.20 until cutover)"
+  description = "Staging IP of k3s on alt (production k3s stays on 192.168.0.20 until cutover)"
   value       = var.k3s_alt_vm.ip
 }
 
@@ -44,12 +44,12 @@ output "k3s_alt_vmid" {
 }
 
 output "k3s_alt_ssh" {
-  description = "SSH command for k3s-alt (only useful after the VM is started)"
+  description = "SSH command for staging k3s on alt (only useful after the VM is started)"
   value       = "ssh ${var.ci_user}@${split("/", var.k3s_alt_vm.ip)[0]}"
 }
 
 output "k3s_alt_started" {
-  description = "Whether Terraform is configured to start k3s-alt"
+  description = "Whether Terraform is configured to start staging k3s on alt"
   value       = var.k3s_alt_started
 }
 
