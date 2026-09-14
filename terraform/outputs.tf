@@ -53,6 +53,26 @@ output "k3s_alt_started" {
   value       = var.k3s_alt_started
 }
 
+output "k3s_alt_kubeconfig" {
+  description = "Path to the fetched staging kubeconfig (gitignored). Empty until the first-boot fetch runs."
+  value       = local.k3s_alt_kubeconfig_ready ? local.k3s_alt_kubeconfig_path : null
+}
+
+output "k3s_alt_argocd_bootstrapped" {
+  description = "Whether this plan includes Helm Argo CD + root Application (needs kubeconfig from a prior apply)"
+  value       = local.k3s_alt_bootstrap_argocd
+}
+
+output "k3s_alt_argocd_exclude" {
+  description = "App manifests excluded from the staging root Application"
+  value       = local.argocd_exclude_files
+}
+
+output "k3s_alt_argocd_admin_secret" {
+  description = "How to read the initial Argo CD admin password after bootstrap"
+  value       = "kubectl --kubeconfig terraform/.kube/k3s-alt.yaml -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
+}
+
 output "gpu_vm_enabled" {
   description = "Whether the alt GPU passthrough VM is managed by Terraform"
   value       = var.enable_gpu_vm

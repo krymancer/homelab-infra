@@ -1,3 +1,6 @@
+# Production app-of-apps (pve VM 200 / 192.168.0.20). Staging on alt uses a
+# Terraform-applied Application (see k8s/argocd/staging-root.yaml) that excludes
+# pihole.yaml so LoadBalancer 192.168.0.20 is not stolen by a parallel cluster.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

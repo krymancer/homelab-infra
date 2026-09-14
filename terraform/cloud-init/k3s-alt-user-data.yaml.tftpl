@@ -1,0 +1,36 @@
+#cloud-config
+# First-boot only. Changing this snippet does not re-run cloud-init on an
+# existing disk; recreate the VM (terraform apply -replace) to install k3s again.
+hostname: ${hostname}
+manage_etc_hosts: true
+package_update: true
+ssh_pwauth: true
+
+users:
+  - name: ${ci_user}
+    groups: [sudo]
+    shell: /bin/bash
+    lock_passwd: false
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+
+chpasswd:
+  expire: false
+  list: |
+    ${ci_user}:${ci_password}
+
+packages:
+  - qemu-guest-agent
+  - curl
+  - ca-certificates
+
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+  - |
+    set -euo pipefail
+    if command -v k3s >/dev/null 2>&1; then
+      echo "k3s already present, skipping install"
+      exit 0
+    fi
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --write-kubeconfig-mode 644 --tls-san ${node_ip} --node-ip ${node_ip}" sh -

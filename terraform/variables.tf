@@ -93,9 +93,64 @@ variable "k3s_alt_vm" {
 }
 
 variable "k3s_alt_started" {
-  description = "Start the staging k3s VM on alt. Keep false until Ubuntu cloud template 9000 exists on alt and you are ready to boot."
+  description = "Start the staging k3s VM on alt. Keep false until Ubuntu cloud template 9000 exists on alt and you are ready to boot. Cloud-init installs k3s on first boot."
   type        = bool
   default     = false
+}
+
+variable "k3s_alt_snippet_datastore" {
+  description = "Datastore on alt that allows Snippets content (usually local). Enable with: pvesm set local --content backup,iso,vztmpl,snippets"
+  type        = string
+  default     = "local"
+}
+
+variable "k3s_alt_bootstrap_argocd" {
+  description = "After k3s is up, install Argo CD via Helm and apply the root Application. Requires k3s_alt_started=true and a second apply once kubeconfig has been fetched to terraform/.kube/k3s-alt.yaml."
+  type        = bool
+  default     = true
+}
+
+variable "argocd_chart_version" {
+  description = "argo-cd Helm chart version from https://argoproj.github.io/argo-helm"
+  type        = string
+  default     = "10.8.3"
+}
+
+variable "argocd_repo_url" {
+  description = "Git repo the staging root Application syncs"
+  type        = string
+  default     = "https://github.com/krymancer/homelab-infra.git"
+}
+
+variable "argocd_target_revision" {
+  description = "Git revision for the staging root Application (usually main)"
+  type        = string
+  default     = "main"
+}
+
+variable "argocd_repo_credential_url" {
+  description = "Prefix for Argo repo credential templates when argocd_git_token is set. Covers this repo and other https://github.com/krymancer/* apps."
+  type        = string
+  default     = "https://github.com/krymancer"
+}
+
+variable "argocd_git_token" {
+  description = "Optional GitHub PAT for Argo to clone private repos / higher rate limits. Empty skips credentialTemplates."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "argocd_sync_cutover_apps" {
+  description = "When false (default), staging Argo skips pihole.yaml (LoadBalancer 192.168.0.20) and cloudflared.yaml (shared tunnel). Set true only at cutover when this cluster should own those apps."
+  type        = bool
+  default     = false
+}
+
+variable "argocd_extra_exclude_app_files" {
+  description = "Additional filenames under k8s/argocd/apps to exclude from the staging root Application (e.g. [\"tailscale.yaml\"])."
+  type        = list(string)
+  default     = []
 }
 
 variable "enable_gpu_vm" {

@@ -1,0 +1,27 @@
+# Staging app-of-apps for alt VM 220 (192.168.0.23). Terraform applies an
+# equivalent Application after Helm installs Argo CD (see terraform/argocd.tf).
+#
+# Production continues to use k8s/argocd/root.yaml (no directory exclude).
+# Default exclude keeps Pi-hole (LoadBalancer 192.168.0.20) and cloudflared
+# (shared tunnel UUID) off a parallel cluster until cutover.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/krymancer/homelab-infra.git
+    targetRevision: main
+    path: k8s/argocd/apps
+    directory:
+      recurse: false
+      exclude: "{pihole.yaml,cloudflared.yaml}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
