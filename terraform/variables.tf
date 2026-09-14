@@ -129,14 +129,14 @@ variable "hermes_lxc" {
     template = string
   })
   default = {
-    vmid     = 210
-    name     = "hermes"
-    cores    = 2
-    memory   = 2048
-    disk     = "16G"
-    storage  = "ssd"
-    ip       = "192.168.0.22/24"
-    gateway  = "192.168.0.1"
+    vmid    = 210
+    name    = "hermes"
+    cores   = 2
+    memory  = 2048
+    disk    = "16G"
+    storage = "ssd"
+    ip      = "192.168.0.22/24"
+    gateway = "192.168.0.1"
     # Confirm on alt: `pveam list local`. Download if missing:
     #   pveam update && pveam download local debian-13-standard
     template = "local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst"
