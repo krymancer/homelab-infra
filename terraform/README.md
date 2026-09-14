@@ -4,10 +4,10 @@ Manages VMs and LXCs on two standalone Proxmox hosts. They are **not** a cluster
 
 | Host | Role | API | Node name |
 |------|------|-----|-----------|
-| Dell G15 | k3s VM 200, Arch LXC `dev` 201, Pi-hole/DNS | `https://192.168.0.10:8006` | `pve` |
+| Dell G15 | k3s VM 200, Pi-hole/DNS | `https://192.168.0.10:8006` | `pve` |
 | alt | Debian LXC `hermes` 210 | `https://192.168.0.11:8006` | `alt` |
 
-Do not attach `provider = proxmox.alt` (or any explicit provider) to the existing k3s/dev resources; that would look like a move.
+Do not attach `provider = proxmox.alt` (or any explicit provider) to the existing k3s resources; that would look like a move.
 
 ## Dual-node API tokens
 
@@ -26,7 +26,7 @@ Copy `terraform.tfvars.example` to `terraform.tfvars` (gitignored). Never commit
 
 ## Hermes LXC (`alt`)
 
-Unprivileged Debian 13 container, VMID 210, `192.168.0.22/24` on `vmbr0`, disk on datastore `ssd` (zfspool). DNS is Pi-hole on the G15 (`192.168.0.20`) plus `1.1.1.1`. TUN is patched on **alt** (same `lxc.cgroup2` + `/dev/net/tun` pattern as `dev`) so Tailscale can run; `tailscale up` uses `--ssh`.
+Unprivileged Debian 13 container, VMID 210, `192.168.0.22/24` on `vmbr0`, disk on datastore `ssd` (zfspool). DNS is Pi-hole on the G15 (`192.168.0.20`) plus `1.1.1.1`. TUN is patched on **alt** (`lxc.cgroup2` + `/dev/net/tun`) so Tailscale can run; `tailscale up` uses `--ssh`.
 
 Debian template on alt (`local:vztmpl/...`). Confirm the exact filename, then download if missing:
 

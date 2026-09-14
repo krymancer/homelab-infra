@@ -89,32 +89,6 @@ variable "tailscale_auth_key" {
   sensitive   = true
 }
 
-variable "dev_lxc" {
-  description = "Dev LXC container configuration"
-  type = object({
-    vmid     = number
-    name     = string
-    cores    = number
-    memory   = number
-    disk     = string
-    storage  = string
-    ip       = string
-    gateway  = string
-    template = string
-  })
-  default = {
-    vmid     = 201
-    name     = "dev"
-    cores    = 8
-    memory   = 8192
-    disk     = "90G"
-    storage  = "local-lvm"
-    ip       = "192.168.0.21/24"
-    gateway  = "192.168.0.1"
-    template = "local:vztmpl/archlinux-base_20260420-1_amd64.tar.zst"
-  }
-}
-
 variable "hermes_lxc" {
   description = "Hermes Debian LXC on alt"
   type = object({
