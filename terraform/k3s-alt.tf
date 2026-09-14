@@ -2,10 +2,11 @@
 #
 # Production remains proxmox_virtual_environment_vm.k3s on pve (VMID 200,
 # 192.168.0.20) until cutover. TF resource stays k3s_alt so it does not collide
-# with pve's k3s; Proxmox VM name / cloud-init hostname is `k3s`.
+# with pve's k3s; Proxmox VM name is `k3s`.
 # A later cutover will move cluster services here and may reassign 192.168.0.20.
 #
-# Prerequisite on alt before apply: Ubuntu cloud-init template VMID 9000.
+# Prerequisite on alt before apply: Ubuntu cloud-init template VMID 9000
+# (include qemu-guest-agent so apply does not hang waiting for the agent).
 
 resource "proxmox_virtual_environment_vm" "k3s_alt" {
   provider = proxmox.alt
@@ -52,8 +53,9 @@ resource "proxmox_virtual_environment_vm" "k3s_alt" {
   }
 
   initialization {
-    datastore_id = var.k3s_alt_vm.storage
-    hostname     = var.k3s_alt_vm.name
+    # Cloud-init ISO cannot live on zfspool (`ssd`). Clone/scsi0 stay on ssd.
+    # bpg/proxmox 0.113 has no initialization.hostname on this resource.
+    datastore_id = "local-lvm"
 
     dns {
       servers = ["192.168.0.20", "1.1.1.1"]

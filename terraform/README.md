@@ -42,7 +42,9 @@ If the downloaded filename differs from `debian-13-standard_13.1-2_amd64.tar.zst
 
 ## Staging k3s VM (`alt`)
 
-`proxmox_virtual_environment_vm.k3s_alt` clones Ubuntu cloud-init template **VMID 9000 on alt** into VMID 220 (`k3s`), 8 cores / 16 GiB / 120G on datastore `ssd`, virtio on `vmbr0`, cloud-init user `junho`. The Terraform resource stays `k3s_alt` so it does not collide with production `proxmox_virtual_environment_vm.k3s` on pve; Proxmox VM name and cloud-init hostname are both `k3s`.
+`proxmox_virtual_environment_vm.k3s_alt` clones Ubuntu cloud-init template **VMID 9000 on alt** into VMID 220 (`k3s`), 8 cores / 16 GiB / 120G on datastore `ssd`, virtio on `vmbr0`, cloud-init user `junho`. The Terraform resource stays `k3s_alt` so it does not collide with production `proxmox_virtual_environment_vm.k3s` on pve; Proxmox VM name is `k3s`.
+
+Clone and scsi0 stay on `ssd` (zfspool). Cloud-init ISO (`initialization.datastore_id`) must be `local-lvm` — Proxmox cannot store that ISO on a zfspool. `initialization.hostname` is not valid on this resource in bpg/proxmox 0.113.
 
 | | Production (`k3s` on pve) | Staging (`k3s` on alt) |
 |--|--|--|
@@ -54,7 +56,7 @@ If the downloaded filename differs from `debian-13-standard_13.1-2_amd64.tar.zst
 | DNS | (unchanged) | Pi-hole `192.168.0.20` + `1.1.1.1` |
 | Started | live | `started = false`, `on_boot = false` |
 
-Create the Ubuntu cloud template on alt as VMID 9000 **before** `terraform apply`. Apply will fail if that template is missing.
+Create the Ubuntu cloud template on alt as VMID 9000 **before** `terraform apply`. Apply will fail if that template is missing. Bake `qemu-guest-agent` into that template (`apt install qemu-guest-agent` and enable the service) so apply does not hang waiting for the guest agent. A first boot of an unprepared image needed a manual install.
 
 Keep `k3s_alt_started = false` for this prep step. Flip it only when you intend to boot the guest.
 
