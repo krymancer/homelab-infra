@@ -5,6 +5,16 @@ metadata:
   namespace: default
 spec:
   secretName: homelab-wildcard-tls
+  # secretTemplate is copied onto the issued Secret so Reflector can
+  # auto-mirror homelab-wildcard-tls into app namespaces after renewals.
+  # If the live Secret is missing these annotations (template may only
+  # apply on the next issue), annotate default/homelab-wildcard-tls once.
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "homepage,uptime-kuma,argocd,pihole,vaultwarden,monitoring,ntfy,it-tools,forgejo,cobalt,aiostreams,aiometadata"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "homepage,uptime-kuma,argocd,pihole,vaultwarden,monitoring,ntfy,it-tools,forgejo,cobalt,aiostreams,aiometadata"
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer

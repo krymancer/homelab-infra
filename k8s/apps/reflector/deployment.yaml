@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reflector
+  namespace: reflector
+  labels:
+    app: reflector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reflector
+  template:
+    metadata:
+      labels:
+        app: reflector
+    spec:
+      serviceAccountName: reflector
+      securityContext:
+        fsGroup: 2000
+      containers:
+        - name: reflector
+          image: emberstack/kubernetes-reflector:10.0.65
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+          env:
+            - name: ES_Serilog__MinimumLevel__Default
+              value: "Information"
+            - name: ES_Ignite__KubernetesClient__SkipTlsVerify
+              value: "false"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 25m
+            limits:
+              memory: 256Mi
+              cpu: 250m
