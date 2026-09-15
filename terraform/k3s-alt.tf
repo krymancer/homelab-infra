@@ -63,8 +63,12 @@ resource "proxmox_virtual_environment_vm" "k3s_alt" {
     type    = "host"
   }
 
+  # Production k3s on alt (LAN 192.168.0.20 after cutover). dedicated is the
+  # 16 GiB ceiling (qm memory); floating is the 8 GiB balloon floor (qm balloon).
+  # Unset floating defaults to 0 and would disable ballooning on the next apply.
   memory {
     dedicated = var.k3s_alt_vm.memory
+    floating  = var.k3s_alt_vm.balloon
   }
 
   disk {

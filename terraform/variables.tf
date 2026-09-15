@@ -73,6 +73,7 @@ variable "k3s_alt_vm" {
     name     = string
     cores    = number
     memory   = number
+    balloon  = optional(number, 8192)
     disk     = string
     storage  = string
     ip       = string
@@ -84,6 +85,7 @@ variable "k3s_alt_vm" {
     name     = "k3s"
     cores    = 8
     memory   = 16384
+    balloon  = 8192
     disk     = "120G"
     storage  = "ssd"
     ip       = "192.168.0.23/24"
