@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ladder
+  namespace: ladder
+  labels:
+    app: ladder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ladder
+  template:
+    metadata:
+      labels:
+        app: ladder
+    spec:
+      containers:
+        - name: ladder
+          image: ghcr.io/everywall/ladder:v0.0.23
+          env:
+            - name: PORT
+              value: "8080"
+            - name: RULESET
+              value: "https://raw.githubusercontent.com/everywall/ladder-rules/main/ruleset.yaml"
+            - name: USERPASS
+              valueFrom:
+                secretKeyRef:
+                  name: ladder-auth
+                  key: userpass
+                  optional: true
+            - name: EXPOSE_RULESET
+              value: "false"
+            - name: LOG_URLS
+              value: "true"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 10m
+            limits:
+              memory: 128Mi
+              cpu: 100m
