@@ -1,5 +1,35 @@
+# kube-prometheus-stack values for the existing one-shot Helm release
+# `kube-prom` (chart kube-prometheus-stack-83.4.2) in namespace `monitoring`.
+#
+# This file is NOT Argo-synced. Putting the Helm release under Argo would
+# fight the live `kube-prom` install (release secret, PVC names, CR ownership).
+# Exporters, Probe/ServiceMonitor CRs, and dashboards live in extras/ and are
+# synced by Application `monitoring`.
+#
+# Probe / ServiceMonitor objects in extras/ are labeled `release: kube-prom`
+# so the operator's default helm-value selectors pick them up without widening
+# Prometheus to scrape the whole cluster.
+#
+# After changing this file (mixin prune, scrape jobs, NodePorts):
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm repo update
+#   helm upgrade kube-prom prometheus-community/kube-prometheus-stack \
+#     --namespace monitoring --version 83.4.2 \
+#     -f k8s/apps/monitoring/values.yaml
+
 grafana:
   adminPassword: admin
+  # Quiet Grafana: drop kube-prometheus mixin dashboards (chart 83.x).
+  defaultDashboardsEnabled: false
+  sidecar:
+    datasources:
+      uid: prometheus
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+      folderAnnotation: grafana_folder
   service:
     type: NodePort
     nodePort: 30900
@@ -22,6 +52,43 @@ prometheus:
           resources:
             requests:
               storage: 10Gi
+    # Host node_exporter + pve-exporter /pve. Blackbox and speedtest are
+    # Probe / ServiceMonitor CRs in extras/ (same release label).
+    additionalScrapeConfigs:
+      - job_name: node-exporter-alt
+        scrape_interval: 30s
+        static_configs:
+          - targets:
+              - 192.168.0.11:9100
+            labels:
+              instance: alt
+              nodename: alt
+              homelab_role: proxmox-host
+      # Optional: Hermes LXC node_exporter (install later, then uncomment).
+      # - job_name: node-exporter-hermes
+      #   scrape_interval: 30s
+      #   static_configs:
+      #     - targets:
+      #         - 192.168.0.22:9100
+      #       labels:
+      #         instance: hermes
+      #         nodename: hermes
+      #         homelab_role: lxc-guest
+      - job_name: pve
+        scrape_interval: 30s
+        scrape_timeout: 20s
+        metrics_path: /pve
+        params:
+          module:
+            - default
+          target:
+            - 192.168.0.11
+        static_configs:
+          - targets:
+              - pve-exporter.monitoring.svc:9221
+            labels:
+              instance: alt
+              homelab_role: proxmox-api
 
 alertmanager:
   enabled: false

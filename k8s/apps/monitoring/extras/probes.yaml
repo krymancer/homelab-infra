@@ -1,0 +1,73 @@
+# Prometheus Operator Probe CRs. jobName values match Internet Monitoring:
+#   probe_success{job=~"blackbox_.*"}
+#   probe_duration_seconds{job=~"blackbox_dns.*"}
+#   probe_http_duration_seconds{phase="connect",job="blackbox_http"}
+#
+# Label release: kube-prom matches kube-prometheus-stack's default
+# probeSelector (helm release name). ICMP is not defined here.
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: blackbox-http
+  namespace: monitoring
+  labels:
+    app: blackbox-exporter
+    release: kube-prom
+spec:
+  jobName: blackbox_http
+  interval: 60s
+  scrapeTimeout: 15s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter.monitoring.svc:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - https://1.1.1.1
+        - https://google.com
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: blackbox-dns-google
+  namespace: monitoring
+  labels:
+    app: blackbox-exporter
+    release: kube-prom
+spec:
+  jobName: blackbox_dns_google
+  interval: 60s
+  scrapeTimeout: 10s
+  module: dns_google
+  prober:
+    url: blackbox-exporter.monitoring.svc:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - 1.1.1.1
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: blackbox-dns-cloudflare
+  namespace: monitoring
+  labels:
+    app: blackbox-exporter
+    release: kube-prom
+spec:
+  jobName: blackbox_dns_cloudflare
+  interval: 60s
+  scrapeTimeout: 10s
+  module: dns_cloudflare
+  prober:
+    url: blackbox-exporter.monitoring.svc:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - 1.1.1.1

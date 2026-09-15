@@ -1,0 +1,23 @@
+# GitOps extras for the live kube-prom Helm release (not the Helm release itself).
+# Probe/ServiceMonitor CRs need prometheus-operator from kube-prometheus-stack.
+# Staging clusters without that chart will show this Application as degraded.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/krymancer/homelab-infra.git
+    targetRevision: main
+    path: k8s/apps/monitoring/extras
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
