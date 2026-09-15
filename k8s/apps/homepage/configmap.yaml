@@ -95,6 +95,11 @@ data:
             description: Dev toolbox
             icon: it-tools
             siteMonitor: http://it-tools.it-tools.svc.cluster.local:80
+        - Ladder:
+            href: https://ladder.homelab.krymancer.dev
+            description: HTTP proxy (paywall/CORS)
+            icon: mdi-ladder
+            siteMonitor: http://ladder.ladder.svc.cluster.local:8080
     - Apps:
         - Job Applications:
             href: https://jobs.homelab.krymancer.dev

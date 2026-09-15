@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ladder
+  namespace: ladder
+spec:
+  tls:
+    - hosts:
+        - ladder.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: ladder.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ladder
+                port:
+                  number: 8080
