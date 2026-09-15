@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: paperless
+  namespace: paperless
+spec:
+  tls:
+    - hosts:
+        - paperless.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: paperless.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: paperless
+                port:
+                  number: 8000

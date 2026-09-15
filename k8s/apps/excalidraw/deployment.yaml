@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: excalidraw
+  namespace: excalidraw
+  labels:
+    app: excalidraw
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: excalidraw
+  template:
+    metadata:
+      labels:
+        app: excalidraw
+    spec:
+      containers:
+        - name: excalidraw
+          # Official image has no semver tags (only :latest and old sha-*
+          # commit tags). Pin the 2026-05-06 multi-arch index digest.
+          image: docker.io/excalidraw/excalidraw@sha256:f7ee194addd607bf831d2af0f0a34463dd4225e426cf35199ef0b12a803398e9
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 10m
+            limits:
+              memory: 128Mi
+              cpu: 100m

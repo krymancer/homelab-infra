@@ -105,6 +105,16 @@ data:
             description: Plain-text accounting
             icon: mdi-book-open-page-variant
             siteMonitor: http://hledger.hledger.svc.cluster.local:5000
+        - Excalidraw:
+            href: https://draw.homelab.krymancer.dev
+            description: Whiteboard
+            icon: mdi-draw
+            siteMonitor: http://excalidraw.excalidraw.svc.cluster.local:80
+        - Paperless-ngx:
+            href: https://paperless.homelab.krymancer.dev
+            description: Document management
+            icon: paperless-ngx
+            siteMonitor: http://paperless.paperless.svc.cluster.local:8000
     - Apps:
         - Job Applications:
             href: https://jobs.homelab.krymancer.dev

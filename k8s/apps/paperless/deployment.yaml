@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless
+  namespace: paperless
+  labels:
+    app: paperless
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: paperless
+  template:
+    metadata:
+      labels:
+        app: paperless
+    spec:
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+        - name: wait-for-deps
+          image: docker.io/library/busybox:1.37
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done
+              until nc -z redis 6379; do echo waiting for redis; sleep 2; done
+      containers:
+        - name: paperless
+          image: ghcr.io/paperless-ngx/paperless-ngx:3.1.3
+          env:
+            - name: PAPERLESS_REDIS
+              value: redis://redis:6379
+            - name: PAPERLESS_DBENGINE
+              value: postgresql
+            - name: PAPERLESS_DBHOST
+              value: postgres
+            - name: PAPERLESS_DBNAME
+              value: paperless
+            - name: PAPERLESS_DBUSER
+              value: paperless
+            - name: PAPERLESS_DBPASS
+              valueFrom:
+                secretKeyRef:
+                  name: paperless
+                  key: PAPERLESS_DBPASS
+                  optional: true
+            - name: PAPERLESS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: paperless
+                  key: PAPERLESS_SECRET_KEY
+                  optional: true
+            - name: PAPERLESS_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: paperless
+                  key: PAPERLESS_ADMIN_USER
+                  optional: true
+            - name: PAPERLESS_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paperless
+                  key: PAPERLESS_ADMIN_PASSWORD
+                  optional: true
+            - name: PAPERLESS_URL
+              value: "https://paperless.homelab.krymancer.dev"
+            - name: PAPERLESS_TIME_ZONE
+              value: America/Sao_Paulo
+            - name: PAPERLESS_OCR_LANGUAGE
+              value: por+eng
+            - name: PAPERLESS_WEBSERVER_WORKERS
+              value: "1"
+            - name: PAPERLESS_TASK_WORKERS
+              value: "1"
+            - name: USERMAP_UID
+              value: "1000"
+            - name: USERMAP_GID
+              value: "1000"
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/paperless/data
+            - name: media
+              mountPath: /usr/src/paperless/media
+            - name: consume
+              mountPath: /usr/src/paperless/consume
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 60
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 100m
+            limits:
+              memory: 2Gi
+              cpu: 2000m
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperless-data
+        - name: media
+          persistentVolumeClaim:
+            claimName: paperless-media
+        - name: consume
+          persistentVolumeClaim:
+            claimName: paperless-consume

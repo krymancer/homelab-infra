@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: paperless
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: redis
+          image: docker.io/library/redis:7.4.11-alpine
+          args:
+            - redis-server
+            - --appendonly
+            - "yes"
+          ports:
+            - containerPort: 6379
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 10m
+            limits:
+              memory: 128Mi
+              cpu: 100m
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: paperless-redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: paperless
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
