@@ -6,6 +6,8 @@ GitOps covers **extras only** (exporters, Probe/ServiceMonitor CRs, dashboard Co
 
 Grafana login stays chart default **`admin` / `admin`** (do not change it in this tree). Datasource UID is `prometheus` (`grafana.sidecar.datasources.uid`).
 
+The daily driver is Homepage at [https://home.homelab.krymancer.dev](https://home.homelab.krymancer.dev). Grafana’s home dashboard is the **Alt / Homelab Host** overview (`alt-homelab-host`), not a replacement for Homepage.
+
 ## Apply order
 
 1. Create the PVE exporter secret (below).
@@ -27,6 +29,7 @@ helm upgrade kube-prom prometheus-community/kube-prometheus-stack \
 What this values file changes vs a stock chart:
 
 - `grafana.defaultDashboardsEnabled: false` — no kube-prometheus mixin dashboards
+- `grafana.grafana.ini.dashboards.default_home_dashboard_path` — Grafana home is **Alt / Homelab Host** (see Dashboards below)
 - Grafana persistence + NodePort **30900**, Prometheus NodePort **30901** (unchanged)
 - `additionalScrapeConfigs`: alt `node_exporter` at `192.168.0.11:9100` (job `node-exporter-alt`); PVE API via `pve-exporter.monitoring.svc:9221` `/pve?target=192.168.0.11` (job `pve`)
 - Hermes `192.168.0.22:9100` scrape is **commented** until that exporter exists
@@ -85,6 +88,21 @@ Allow **9100/tcp** from the k3s VM (`192.168.0.20`) if the PVE firewall is on. O
 ## Dashboards (ConfigMaps `grafana_dashboard=1`, folder Homelab)
 
 Sidecar loads these after Grafana is up. Folder annotation is `grafana_folder: Homelab` (enabled in `values.yaml`).
+
+Grafana home (the `/` landing dashboard after login) is **Alt / Homelab Host**. Chart **83.4.2** uses Grafana subchart **11.6.1**, which documents `sidecar.dashboards.folder: /tmp/dashboards` and passes `grafana.ini` through. Combined with sidecar **2.6.0** joining the relative `grafana_folder` annotation, that file is:
+
+`/tmp/dashboards/Homelab/alt-homelab-host.json`
+
+That path is set in `values.yaml` as `grafana.grafana.ini.dashboards.default_home_dashboard_path` so it survives `helm upgrade`. It is the server default when org/user prefs do not already pin a home dashboard.
+
+If the Grafana PVC already stored a different org home, `grafana.ini` does not override it. After the sidecar has imported UID `alt-homelab-host`, patch org prefs (does not change the admin password):
+
+```bash
+curl -sS -X PATCH -u admin:admin \
+  -H 'Content-Type: application/json' \
+  -d '{"homeDashboardUID":"alt-homelab-host"}' \
+  https://grafana.homelab.krymancer.dev/api/org/preferences
+```
 
 | Dashboard | UID | Needs |
 |-----------|-----|--------|

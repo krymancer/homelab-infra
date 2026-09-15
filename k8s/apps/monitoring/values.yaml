@@ -21,6 +21,14 @@ grafana:
   adminPassword: admin
   # Quiet Grafana: drop kube-prometheus mixin dashboards (chart 83.x).
   defaultDashboardsEnabled: false
+  # Grafana subchart 11.6.1 (kube-prometheus-stack 83.4.2): grafana.ini is
+  # passed through; sidecar.dashboards.folder defaults to /tmp/dashboards.
+  # kiwigrid/k8s-sidecar 2.6.0 joins a relative grafana_folder annotation
+  # onto that folder. extras/alt-host-dashboard.yaml uses Homelab + key
+  # alt-homelab-host.json (UID alt-homelab-host).
+  grafana.ini:
+    dashboards:
+      default_home_dashboard_path: /tmp/dashboards/Homelab/alt-homelab-host.json
   sidecar:
     datasources:
       uid: prometheus
