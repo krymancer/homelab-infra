@@ -98,7 +98,7 @@ Proxmox LXC cloud-init only covers hostname/user/network, so first-boot packages
 
 ## Staging k3s VM (`alt`)
 
-`proxmox_virtual_environment_vm.k3s_alt` clones Ubuntu cloud-init template **VMID 9000 on alt** into VMID 220 (`k3s`), 8 cores / 16 GiB / 120G on datastore `ssd`, virtio on `vmbr0`. The Terraform resource stays `k3s_alt` so it does not collide with production `proxmox_virtual_environment_vm.k3s` on pve; Proxmox VM name is `k3s`.
+`proxmox_virtual_environment_vm.k3s_alt` clones Ubuntu cloud-init template **VMID 9000 on alt** into VMID 220 (`k3s`), 8 cores / balloon 8–16 GiB / 120G on datastore `ssd`, virtio on `vmbr0`. The Terraform resource stays `k3s_alt` so it does not collide with production `proxmox_virtual_environment_vm.k3s` on pve; Proxmox VM name is `k3s`.
 
 Clone and scsi0 stay on `ssd` (zfspool). Cloud-init ISO (`initialization.datastore_id`) must be `local-lvm` — Proxmox cannot store that ISO on a zfspool. `initialization.hostname` is not valid on this resource in bpg/proxmox 0.113; hostname is set in the user_data snippet. bpg also rejects `user_account` together with `user_data_file_id`, so SSH user/key/password live in the snippet.
 
