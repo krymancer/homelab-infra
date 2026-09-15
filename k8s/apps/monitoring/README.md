@@ -107,7 +107,7 @@ curl -sS -X PATCH -u admin:admin \
 | Dashboard | UID | Needs |
 |-----------|-----|--------|
 | **Internet Monitoring** | `internet-monitoring` | Blackbox probes + speedtest. ICMP to `192.168.0.1` is not used. Speedtest panels use `last_over_time(...[2h])` because tests are ~45m apart. |
-| **Alt / Homelab Host** | `alt-homelab-host` | `node-exporter-alt` (host CPU/mem/disk/net, RAPL if `node_rapl_*` exists) and job `pve` (`pve_guest_info` / CPU / mem for **hermes** and **k3s**). GPU is a text placeholder. |
+| **Alt / Homelab Host** | `alt-homelab-host` | `node-exporter-alt` (host CPU/mem/disk/net, RAPL if `node_rapl_*` exists) and job `pve` (`pve_guest_info` / CPU / mem for **hermes** and **k3s**). GPU is omitted while VFIO-bound. |
 | **k3s Cluster** | `k3s-cluster` | In-cluster `job="node-exporter"`, `kube-state-metrics`, kubelet cAdvisor (`container_memory_working_set_bytes`). Not the mixin kitchen sink. |
 
 **GPU:** the RTX 2060 is **VFIO-bound** on alt. There are no host `nvidia-smi` / DCGM metrics until the card is unbound or a GPU guest runs a DCGM/nvml exporter. Do not expect those series.
