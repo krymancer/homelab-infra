@@ -1,11 +1,31 @@
+# Static NFS bind to alt's finance share. Dummy storageClassName so k3s
+# does not assign default local-path. Capacity is a binder only (NFS has
+# no PVC quota). Reclaim Retain so deleting the PV does not touch the NAS.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hledger-nas-finance
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-nas-hledger
+  nfs:
+    server: 192.168.0.11
+    path: /mnt/nas/share/finance
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: hledger-data
+  name: hledger-finance
   namespace: hledger
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
+  storageClassName: nfs-nas-hledger
+  volumeName: hledger-nas-finance
   resources:
     requests:
-      storage: 1Gi
+      storage: 10Gi

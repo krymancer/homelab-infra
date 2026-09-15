@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hledger-starter-journal
-  namespace: hledger
-data:
-  hledger.journal: |
-    ; hledger journal — replace this file with a real ledger (see README.md)
