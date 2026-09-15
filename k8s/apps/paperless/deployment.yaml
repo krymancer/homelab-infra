@@ -72,6 +72,10 @@ spec:
               value: America/Sao_Paulo
             - name: PAPERLESS_OCR_LANGUAGE
               value: por+eng
+            - name: PAPERLESS_OCR_LANGUAGES
+              value: por
+            - name: PAPERLESS_PORT
+              value: "8000"
             - name: PAPERLESS_WEBSERVER_WORKERS
               value: "1"
             - name: PAPERLESS_TASK_WORKERS
