@@ -26,33 +26,12 @@ data:
           }
         ]
       },
-      "description": "Proxmox host alt (192.168.0.11): node_exporter on :9100, PVE API via pve-exporter, guests hermes (LXC 210) and k3s (VM 220). GPU panels are placeholders: the RTX 2060 is VFIO-bound.",
+      "description": "Proxmox host alt (192.168.0.11): node_exporter on :9100, PVE API via pve-exporter, guests hermes (LXC 210) and k3s (VM 220).",
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
       "links": [],
       "panels": [
-        {
-          "gridPos": {
-            "h": 4,
-            "w": 24,
-            "x": 0,
-            "y": 0
-          },
-          "id": 1,
-          "options": {
-            "code": {
-              "language": "markdown",
-              "showLineNumbers": false,
-              "showMiniMap": false
-            },
-            "content": "The **RTX 2060 is VFIO-bound on alt** (`vfio-pci`, intended for passthrough). There are **no host nvidia-smi / DCGM / NVML metrics**. To graph GPU utilization, unbind the card on the host or run a GPU guest with a DCGM/nvml exporter. Do not expect `DCGM_FI_*` or `nvidia_smi_*` series while the device is assigned to VFIO.",
-            "mode": "markdown"
-          },
-          "pluginVersion": "11.0.0",
-          "title": "GPU (placeholder)",
-          "type": "text"
-        },
         {
           "datasource": {
             "type": "prometheus",
@@ -91,7 +70,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 4
+            "y": 0
           },
           "id": 2,
           "options": {
@@ -161,7 +140,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 4
+            "y": 0
           },
           "id": 3,
           "options": {
@@ -231,7 +210,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 12
+            "y": 8
           },
           "id": 4,
           "options": {
@@ -301,7 +280,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 12
+            "y": 8
           },
           "id": 5,
           "options": {
@@ -380,7 +359,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 20
+            "y": 16
           },
           "id": 6,
           "options": {
@@ -450,7 +429,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 20
+            "y": 16
           },
           "id": 7,
           "options": {
@@ -520,7 +499,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 28
+            "y": 24
           },
           "id": 8,
           "options": {
@@ -633,7 +612,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 28
+            "y": 24
           },
           "id": 9,
           "options": {
