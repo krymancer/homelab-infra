@@ -28,3 +28,7 @@ data:
     192.168.0.20 ntfy.homelab.krymancer.dev
     192.168.0.20 tools.homelab.krymancer.dev
     192.168.0.20 meta.homelab.krymancer.dev
+    192.168.0.20 ladder.homelab.krymancer.dev
+    192.168.0.20 draw.homelab.krymancer.dev
+    192.168.0.20 paperless.homelab.krymancer.dev
+    192.168.0.20 hledger.homelab.krymancer.dev
