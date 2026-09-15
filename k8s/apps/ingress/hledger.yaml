@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hledger
+  namespace: hledger
+spec:
+  tls:
+    - hosts:
+        - hledger.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: hledger.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hledger
+                port:
+                  number: 5000
