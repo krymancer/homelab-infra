@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hledger
+  namespace: hledger
+  labels:
+    app: hledger
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hledger
+  template:
+    metadata:
+      labels:
+        app: hledger
+    spec:
+      # Image USER is hledger; k3s local-path PVCs are root-owned. Run as root
+      # so the journal is writable (same as dastapov/hledger docker-compose).
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      initContainers:
+        - name: seed-journal
+          image: dastapov/hledger:1.52.3
+          command:
+            - /bin/sh
+            - -c
+            - |
+              if [ ! -f /data/hledger.journal ]; then
+                cp /seed/hledger.journal /data/hledger.journal
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: seed
+              mountPath: /seed
+              readOnly: true
+      containers:
+        - name: hledger-web
+          image: dastapov/hledger:1.52.3
+          env:
+            - name: HLEDGER_HOST
+              value: "0.0.0.0"
+            - name: HLEDGER_PORT
+              value: "5000"
+            - name: HLEDGER_BASE_URL
+              value: "https://hledger.homelab.krymancer.dev"
+            - name: HLEDGER_JOURNAL_FILE
+              value: "/data/hledger.journal"
+            # view | add | edit — hledger-web has no password; add is the stock default.
+            - name: HLEDGER_ALLOW
+              value: "add"
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 25m
+            limits:
+              memory: 256Mi
+              cpu: 250m
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: hledger-data
+        - name: seed
+          configMap:
+            name: hledger-starter-journal
