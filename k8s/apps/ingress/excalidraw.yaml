@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: excalidraw
+  namespace: excalidraw
+spec:
+  tls:
+    - hosts:
+        - draw.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: draw.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: excalidraw
+                port:
+                  number: 80
