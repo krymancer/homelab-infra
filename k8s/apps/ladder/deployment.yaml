@@ -23,12 +23,6 @@ spec:
               value: "8080"
             - name: RULESET
               value: "https://raw.githubusercontent.com/everywall/ladder-rules/main/ruleset.yaml"
-            - name: USERPASS
-              valueFrom:
-                secretKeyRef:
-                  name: ladder-auth
-                  key: userpass
-                  optional: true
             - name: EXPOSE_RULESET
               value: "false"
             - name: LOG_URLS
