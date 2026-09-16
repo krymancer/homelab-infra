@@ -116,8 +116,8 @@ spec:
         command: [tailscaled]
         args:
         - --tun=userspace-networking
-        - --state=/var/lib/tailscale/tailscaled.state
-        - --statedir=/var/lib/tailscale
+        - --state=/var/lib/tailscale/state/tailscaled.state
+        - --statedir=/var/lib/tailscale/state
         - --socket=/var/run/tailscale/tailscaled.sock
         - --socks5-server=127.0.0.1:1080
         securityContext:
