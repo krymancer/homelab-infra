@@ -8,3 +8,5 @@ spec:
     sourceRange:
       - 192.168.0.0/24
       - 100.64.0.0/10
+      # Tailscale subnet-router SNAT uses its dynamic k3s pod address.
+      - 10.42.0.0/24
