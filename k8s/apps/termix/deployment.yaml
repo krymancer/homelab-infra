@@ -21,6 +21,10 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
+        # Namespaced safe sysctl: bind loopback DNS as UID 1000, without capabilities.
+        sysctls:
+        - name: net.ipv4.ip_unprivileged_port_start
+          value: '0'
       containers:
       - name: http
         image: ghcr.io/lukegus/termix:release-2.7.1@sha256:931e4ce466f4d29b157eb8d6dcd4d36ee5114495c6edddbb19d4e360e2a60f8d
@@ -100,7 +104,92 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /app/data
+        # Only Termix uses the loopback resolver. Sidecars retain ClusterFirst DNS
+        # so Tailscale enrollment/control-plane lookup cannot recurse into itself.
+        - name: tailscale-dns
+          mountPath: /etc/resolv.conf
+          subPath: resolv.conf
+          readOnly: true
+      - name: tailscale
+        image: tailscale/tailscale:v1.102.3@sha256:8c42c4574ab066384fcb72f69e086a2ff1dd3652eb6f56856cee34bcf0d2f680
+        imagePullPolicy: IfNotPresent
+        command: [tailscaled]
+        args:
+        - --tun=userspace-networking
+        - --state=/var/lib/tailscale/tailscaled.state
+        - --statedir=/var/lib/tailscale
+        - --socket=/var/run/tailscale/tailscaled.sock
+        - --socks5-server=127.0.0.1:1080
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        resources:
+          requests:
+            cpu: 10m
+            memory: 48Mi
+          limits:
+            cpu: 300m
+            memory: 192Mi
+        readinessProbe:
+          exec:
+            command: [tailscale, --socket=/var/run/tailscale/tailscaled.sock, ip, '-4']
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - name: tailscale-state
+          mountPath: /var/lib/tailscale
+        - name: tailscale-socket
+          mountPath: /var/run/tailscale
+      - name: tailscale-dns
+        # Reuse the existing pinned image's Node runtime; no package installs.
+        image: ghcr.io/lukegus/termix:release-2.7.1@sha256:931e4ce466f4d29b157eb8d6dcd4d36ee5114495c6edddbb19d4e360e2a60f8d
+        imagePullPolicy: IfNotPresent
+        command: [/usr/local/bin/node, /config/dns-forwarder.cjs]
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: [ALL]
+        resources:
+          requests:
+            cpu: 5m
+            memory: 24Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+        readinessProbe:
+          exec:
+            command:
+            - /usr/local/bin/node
+            - -e
+            - "const s=require('net').connect(53,'127.0.0.1',()=>{s.end();process.exit(0)});s.on('error',()=>process.exit(1));setTimeout(()=>process.exit(1),2000)"
+          periodSeconds: 10
+          timeoutSeconds: 3
+        volumeMounts:
+        - name: tailscale-dns
+          mountPath: /config
+          readOnly: true
+        # LocalAPI is privileged to this identity; only this helper receives it.
+        # No machine-state PVC or LocalAPI socket is mounted into the web app.
+        - name: tailscale-socket
+          mountPath: /var/run/tailscale
+          readOnly: true
       volumes:
+      - name: tailscale-socket
+        emptyDir: {}
       - name: data
         persistentVolumeClaim:
           claimName: termix-data
+      - name: tailscale-state
+        persistentVolumeClaim:
+          claimName: termix-tailscale-state
+      - name: tailscale-dns
+        configMap:
+          name: termix-tailscale-dns

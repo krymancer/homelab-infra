@@ -5,6 +5,32 @@ Image uses `ghcr.io/lukegus/termix:release-2.7.1`, the publishing path verified 
 SQLite/state on a 2Gi local-path PVC; requests 192Mi / limit 512Mi. Only the web
 port 8080 is exposed by ClusterIP/Ingress; internal backend ports stay unexposed.
 
+## Dedicated tailnet connectivity
+
+The userspace Tailscale sidecar owns a separate persisted identity on
+`termix-tailscale-state`; no router auth key is reused. SOCKS5 listens ONLY on
+`127.0.0.1:1080`. Termix host settings must enable SOCKS5 at that loopback address,
+with no proxy authentication (same-pod loopback), for tailnet SSH connections.
+Do not expose this proxy through a Service.
+
+Termix 2.7.1 resolves hostnames before opening SOCKS. A custom loopback-only DNS
+helper forwards the tailnet zone through Tailscale LocalAPI, and other names to
+Cluster DNS. Only the web container receives the custom resolv.conf; the helper
+and Tailscale retain ClusterFirst resolution, avoiding bootstrap loops. The helper
+receives LocalAPI but not machine state; the web app receives neither. This is a
+locally maintained compatibility helper, not an upstream Termix integration.
+Keep `dns-forwarder.cjs` and the ConfigMap embedded copy identical.
+
+Enrollment after GitOps deployment requires owner approval:
+`kubectl -n termix exec deployment/termix -c tailscale -- tailscale up --hostname=termix --accept-dns=false --accept-routes=false --timeout=20s`.
+Approve the displayed URL in the intended tailnet; no SSH credentials are involved.
+Until enrolled the sidecar is not Ready, so the web route is temporarily unavailable.
+
+Test `node --test k8s/apps/termix/dns-forwarder.test.cjs`, then after enrollment:
+`kubectl -n termix exec -i deployment/termix -c http -- node - panam < k8s/apps/termix/verify-tailnet.cjs`.
+The probe verifies hostname resolution and an SSH banner through SOCKS without
+reading or attempting a host password. Repeat for the fully qualified hostname.
+
 ## Authentication / feature scope
 
 First browser registration becomes administrator. Complete it promptly over the
