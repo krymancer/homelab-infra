@@ -32,3 +32,9 @@ data:
     192.168.0.20 draw.homelab.krymancer.dev
     192.168.0.20 paperless.homelab.krymancer.dev
     192.168.0.20 hledger.homelab.krymancer.dev
+    192.168.0.20 actual.homelab.krymancer.dev
+    192.168.0.20 dashlit.homelab.krymancer.dev
+    192.168.0.20 homelable.homelab.krymancer.dev
+    192.168.0.20 termix.homelab.krymancer.dev
+    192.168.0.20 resume.homelab.krymancer.dev
+    192.168.0.20 auth.homelab.krymancer.dev

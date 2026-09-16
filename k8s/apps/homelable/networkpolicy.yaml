@@ -1,0 +1,12 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: homelable-disable-outbound
+  namespace: homelable
+spec:
+  podSelector:
+    matchLabels:
+      app: homelable
+  policyTypes:
+  - Egress
+  egress: []

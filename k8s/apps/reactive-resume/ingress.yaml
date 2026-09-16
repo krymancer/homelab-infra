@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reactive-resume
+  namespace: reactive-resume
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: reactive-resume-lan-only@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - resume.homelab.krymancer.dev
+    secretName: homelab-wildcard-tls
+  rules:
+  - host: resume.homelab.krymancer.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: reactive-resume
+            port:
+              number: 3000

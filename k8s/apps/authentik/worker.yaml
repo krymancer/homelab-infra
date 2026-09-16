@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-worker
+  namespace: authentik
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: authentik-worker
+  template:
+    metadata:
+      labels:
+        app: authentik-worker
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: worker
+        image: ghcr.io/goauthentik/server:2026.8.2@sha256:ff8489a5af4f4fe415ffd180a8e3c10b120bc2592d13d79dac050d977f7b9ecd
+        args:
+        - worker
+        envFrom:
+        - configMapRef:
+            name: authentik-config
+        env:
+        - name: AUTHENTIK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: trial-secrets
+              key: AUTHENTIK_SECRET_KEY
+        - name: AUTHENTIK_POSTGRESQL__PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: trial-secrets
+              key: POSTGRES_PASSWORD
+        - name: AUTHENTIK_BOOTSTRAP_PASSWORD_HASH
+          valueFrom:
+            secretKeyRef:
+              name: trial-secrets
+              key: AUTHENTIK_BOOTSTRAP_PASSWORD_HASH
+        resources:
+          requests:
+            cpu: 200m
+            memory: 768Mi
+          limits:
+            cpu: '2'
+            memory: 1536Mi
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: shm
+          mountPath: /dev/shm
+        startupProbe:
+          exec: &id001
+            command:
+            - ak
+            - healthcheck
+          periodSeconds: 30
+          timeoutSeconds: 15
+          failureThreshold: 30
+        readinessProbe:
+          exec: *id001
+          periodSeconds: 30
+          timeoutSeconds: 15
+          failureThreshold: 5
+        livenessProbe:
+          exec: *id001
+          periodSeconds: 30
+          timeoutSeconds: 15
+          failureThreshold: 5
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: authentik-data
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 512Mi

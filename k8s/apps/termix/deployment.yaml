@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: termix
+  namespace: termix
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: termix
+  template:
+    metadata:
+      labels:
+        app: termix
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: http
+        image: ghcr.io/lukegus/termix:release-2.7.1@sha256:931e4ce466f4d29b157eb8d6dcd4d36ee5114495c6edddbb19d4e360e2a60f8d
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - name: http
+          containerPort: 8080
+        resources:
+          requests:
+            cpu: 25m
+            memory: 192Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 5
+        env:
+        - name: PORT
+          value: '8080'
+        - name: DATA_DIR
+          value: /app/data
+        - name: NODE_ENV
+          value: production
+        - name: ENABLE_GUACAMOLE
+          value: 'false'
+        - name: ENABLE_TELEMETRY
+          value: 'false'
+        - name: ENABLE_SSL
+          value: 'false'
+        - name: TRUSTED_PROXY_AUTH_ENABLED
+          value: 'false'
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: termix-crypto
+              key: JWT_SECRET
+        - name: DATABASE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: termix-crypto
+              key: DATABASE_KEY
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: termix-crypto
+              key: ENCRYPTION_KEY
+        - name: INTERNAL_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: termix-crypto
+              key: INTERNAL_AUTH_TOKEN
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: termix-data

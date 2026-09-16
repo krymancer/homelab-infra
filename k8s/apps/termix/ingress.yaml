@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: termix
+  namespace: termix
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: termix-lan-only@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - termix.homelab.krymancer.dev
+    secretName: homelab-wildcard-tls
+  rules:
+  - host: termix.homelab.krymancer.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: termix
+            port:
+              number: 8080

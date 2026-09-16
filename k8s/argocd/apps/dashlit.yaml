@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dashlit
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/krymancer/homelab-infra.git
+    targetRevision: main
+    path: k8s/apps/dashlit
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dashlit
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
