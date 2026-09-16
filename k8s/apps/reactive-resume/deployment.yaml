@@ -38,7 +38,7 @@ spec:
         - name: LOCAL_STORAGE_PATH
           value: /app/data
         - name: FLAG_DISABLE_SIGNUPS
-          value: 'false'
+          value: 'true'
         - name: FLAG_DISABLE_EMAIL_AUTH
           value: 'false'
         - name: FLAG_ALLOW_UNSAFE_AI_BASE_URL
