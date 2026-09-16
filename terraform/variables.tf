@@ -227,7 +227,7 @@ variable "hermes_lxc" {
     vmid    = 210
     name    = "hermes"
     cores   = 2
-    memory  = 2048
+    memory  = 4096
     disk    = "16G"
     storage = "ssd"
     ip      = "192.168.0.22/24"
