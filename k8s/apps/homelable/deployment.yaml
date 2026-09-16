@@ -16,6 +16,12 @@ spec:
         app: homelable
     spec:
       automountServiceAccountToken: false
+      # Pin only this TLS name to the existing ingress Service; no external DNS
+      # or LAN-wide egress is needed. Update if the Service is recreated.
+      hostAliases:
+      - ip: 10.43.213.255
+        hostnames:
+        - pve.homelab.krymancer.dev
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
@@ -83,6 +89,22 @@ spec:
           value: ''
         - name: HOMEPAGE_API_KEY
           value: ''
+        - name: PROXMOX_HOST
+          value: pve.homelab.krymancer.dev
+        - name: PROXMOX_PORT
+          value: '443'
+        - name: PROXMOX_VERIFY_TLS
+          value: 'true'
+        - name: PROXMOX_TOKEN_ID
+          valueFrom:
+            secretKeyRef:
+              name: homelable-proxmox
+              key: PROXMOX_TOKEN_ID
+        - name: PROXMOX_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: homelable-proxmox
+              key: PROXMOX_TOKEN_SECRET
         - name: PROXMOX_SYNC_ENABLED
           value: 'false'
         - name: ZIGBEE_SYNC_ENABLED

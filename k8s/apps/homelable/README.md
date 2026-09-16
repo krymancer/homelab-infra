@@ -20,8 +20,9 @@ The command deliberately reveals the login: do not paste its output into chat/lo
 Do not rotate SECRET_KEY casually; treat it as persistent application key material.
 MCP is not deployed and MCP service auth is explicitly empty/disabled. Live view and
 Homepage unauthenticated API keys are disabled. Scanner ranges are empty, HTTP
-probes/service checks and Proxmox/MQTT sync are off. A deny-all **egress** NetworkPolicy
-prevents actual network scanning/status checks even if UI settings are changed.
+probes/service checks and scheduled Proxmox/MQTT sync are off. Default-deny **egress**
+allows only the existing Traefik HTTPS endpoint for manual Proxmox inventory import.
+Direct LAN/Internet scanning remains blocked even if UI settings are changed.
 Loopback API calls and responses to inbound requests still work. k3s must enforce
 NetworkPolicy (standard k3s network-policy controller); verify this after deployment.
 The upstream status scheduler itself remains running; there is no global supported
@@ -50,8 +51,38 @@ browser-side fetching external diagram/icon URLs is not controlled by this polic
   usage. Resource limits are conservative trial limits, not upstream guarantees.
 
 No host networking, privilege escalation, Linux capabilities, host mounts, Docker
-socket, Kubernetes token, remote SSH keys, or Proxmox credentials are supplied.
+socket, Kubernetes token, or remote SSH keys are supplied. Only the dedicated
+read-only Proxmox inventory token described below is supplied to the backend.
 All containers run as UID/GID 1000 with RuntimeDefault seccomp.
+
+## Read-only Proxmox inventory
+
+- Endpoint: `https://pve.homelab.krymancer.dev:443`, with `PROXMOX_VERIFY_TLS=true`.
+  This uses the existing valid ingress certificate and route to Proxmox `alt`.
+  The existing ingress-to-Proxmox transport is managed elsewhere; this change
+  does not change its TLS settings (currently an upstream skip-verify transport).
+- `homelable@pve!inventory` is privilege-separated, with **only PVEAuditor** at
+  `/` (propagated) on BOTH the dedicated user and token. No root/monitoring token.
+- Out-of-band Secret `homelable/homelable-proxmox` has `PROXMOX_TOKEN_ID` and
+  `PROXMOX_TOKEN_SECRET`; inject via Secret references, never Git or browser.
+  Create/update by stdin from an in-memory credential capture; do not log values
+  or use secret-bearing CLI arguments / last-applied annotations.
+- In the import form, use host above, port **443**, Verify TLS **on**, leave token
+  fields empty (server fallback), and choose **Inventory only**, never canvas.
+  API equivalent: `POST /api/v1/proxmox/test-connection`, then
+  `POST /api/v1/proxmox/import-pending` with host/port/verify_tls only; poll the
+  returned run using `/api/v1/scan/runs/{id}`. Read inventory before importing.
+- Scheduled sync remains disabled. MCP, scans, probes and service checks remain off.
+- Pod-local `hostAliases` maps only the TLS hostname to the existing Traefik
+  ClusterIP `10.43.213.255`; no DNS exceptions or global DNS edits are required.
+  If that Service is recreated with a new IP, update the alias through GitOps.
+  Egress allows only kube-system Traefik pods, TCP 8443 (Service post-DNAT).
+  L3/L4 NetworkPolicy cannot restrict virtual hosts/paths on the shared ingress;
+  other routes at that same HTTPS listener are reachable, not arbitrary networks.
+- After a Secret update, restart the Homelable deployment and verify config,
+  test-connection, inventory IDs, and unchanged canvas. Back up this Secret with
+  the existing app credentials. Rollback by reverting the manifests and revoking
+  only `homelable@pve!inventory`; do not delete inventory/PVC or other PVE users.
 
 ## Verified upstream images
 
