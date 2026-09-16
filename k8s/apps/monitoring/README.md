@@ -1,5 +1,24 @@
 # Monitoring (Grafana / Prometheus)
 
+## Homelab collection budget
+
+Regular scrapes and rule evaluations run every 60 seconds. The kubelet interval
+explicitly overrides cAdvisor's chart default of 10 seconds; blackbox probes stay
+at 60 seconds and speed tests stay at 45 minutes. Retention remains 15 days.
+
+Single-node k3s exposes its shared control-plane registry through both apiserver
+and kubelet endpoints. The kubelet `/metrics` scrape drops duplicated
+`apiserver_*`, `etcd_*`, `scheduler_*`, `workqueue_*`, and `kubeproxy_*` families;
+these remain collected through `job=apiserver`. cAdvisor container metrics,
+kubelet metrics, workload state and probe results are preserved. Do not carry
+this k3s-specific filter to a different cluster without checking endpoint coverage.
+
+Changing frequency lowers sample ingestion, while removing duplicate series
+reduces cardinality. Existing head-series memory may take compaction/garbage
+collection to decline; do not delete history or impose a low memory limit to
+force an immediate reduction. Verify target health, dashboard expressions and
+Warden's read-only collector after changing these settings.
+
 kube-prometheus-stack is a **one-shot Helm release** named `kube-prom` in namespace `monitoring` (chart **83.4.2**). It is **not** an Argo Application: wrapping that release would fight the existing Helm secret, PVCs, and operator-owned CRs.
 
 GitOps covers **extras only** (exporters, Probe/ServiceMonitor CRs, dashboard ConfigMaps) via Application `monitoring` → `k8s/apps/monitoring/extras`. Helm values for the stack live here as `values.yaml` and are applied with `helm upgrade`.
