@@ -1,0 +1,12 @@
+# Preserve LAN/Tailscale source addresses for ingress IP allowlists.
+# k3s owns the HelmChart; Argo owns only its documented override resource.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |
+    service:
+      spec:
+        externalTrafficPolicy: Local
