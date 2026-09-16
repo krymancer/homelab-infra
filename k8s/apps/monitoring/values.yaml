@@ -51,6 +51,9 @@ prometheus:
     type: NodePort
     nodePort: 30901
   prometheusSpec:
+    # Homelab resolution: one minute is sufficient for dashboards and alerts.
+    scrapeInterval: 60s
+    evaluationInterval: 60s
     retention: 15d
     storageSpec:
       volumeClaimTemplate:
@@ -64,7 +67,7 @@ prometheus:
     # Probe / ServiceMonitor CRs in extras/ (same release label).
     additionalScrapeConfigs:
       - job_name: node-exporter-alt
-        scrape_interval: 30s
+        scrape_interval: 60s
         static_configs:
           - targets:
               - 192.168.0.11:9100
@@ -74,7 +77,7 @@ prometheus:
               homelab_role: proxmox-host
       # Optional: Hermes LXC node_exporter (install later, then uncomment).
       # - job_name: node-exporter-hermes
-      #   scrape_interval: 30s
+      #   scrape_interval: 60s
       #   static_configs:
       #     - targets:
       #         - 192.168.0.22:9100
@@ -83,7 +86,7 @@ prometheus:
       #         nodename: hermes
       #         homelab_role: lxc-guest
       - job_name: pve
-        scrape_interval: 30s
+        scrape_interval: 60s
         scrape_timeout: 20s
         metrics_path: /pve
         params:
@@ -97,6 +100,20 @@ prometheus:
             labels:
               instance: alt
               homelab_role: proxmox-api
+
+# k3s exposes embedded control-plane metrics at both API and kubelet endpoints.
+# Keep one copy under job=apiserver; preserve kubelet, cAdvisor and probe metrics.
+kubelet:
+  serviceMonitor:
+    interval: 60s
+    metricRelabelings:
+      # Preserve the chart's default noisy storage histogram filter.
+      - action: drop
+        regex: '(csi_operations|storage_operation_duration)_seconds_bucket;(0.25|2.5|15|25|120|600)(\.0)?'
+        sourceLabels: [__name__, le]
+      - action: drop
+        regex: '(apiserver|etcd|scheduler|workqueue|kubeproxy)_.*'
+        sourceLabels: [__name__]
 
 alertmanager:
   enabled: false
