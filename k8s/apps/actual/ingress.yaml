@@ -7,7 +7,8 @@ metadata:
 spec:
   ipAllowList:
     sourceRange:
-      - 192.168.0.22/32 # Bootstrap: operator only until server password is set.
+      - 192.168.0.0/24
+      - 100.64.0.0/10
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
