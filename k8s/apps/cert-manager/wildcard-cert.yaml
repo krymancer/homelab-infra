@@ -13,8 +13,8 @@ spec:
     annotations:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
-      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "homepage,uptime-kuma,argocd,pihole,vaultwarden,monitoring,ntfy,it-tools,cobalt,aiostreams,aiometadata,ladder,hledger,excalidraw,paperless"
-      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "homepage,uptime-kuma,argocd,pihole,vaultwarden,monitoring,ntfy,it-tools,cobalt,aiostreams,aiometadata,ladder,hledger,excalidraw,paperless"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "homepage,uptime-kuma,argocd,pihole,vaultwarden,monitoring,ntfy,it-tools,cobalt,aiostreams,aiometadata,ladder,hledger,excalidraw,paperless,actual,dashlit,homelable,termix,reactive-resume,authentik"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "homepage,uptime-kuma,argocd,pihole,vaultwarden,monitoring,ntfy,it-tools,cobalt,aiostreams,aiometadata,ladder,hledger,excalidraw,paperless,actual,dashlit,homelable,termix,reactive-resume,authentik"
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer

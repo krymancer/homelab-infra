@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashlit
+  namespace: dashlit
+spec:
+  type: ClusterIP
+  selector:
+    app: dashlit
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

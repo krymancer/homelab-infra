@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashlit
+  namespace: dashlit
+  labels:
+    app: dashlit
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: dashlit
+  template:
+    metadata:
+      labels:
+        app: dashlit
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: dashlit
+          image: ghcr.io/codewec/dashlit:v1.1.1@sha256:41b33c90d8ee8cd7ba469b181fb5ffb8cc2e4a2c35755ef1abb8fd6fe386500c
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: ADDR
+              value: ":8080"
+            - name: DATA_DIR
+              value: "/data"
+            - name: INITIAL_ADMIN_USERNAME
+              value: "admin"
+            - name: DISABLE_PASSWORD_REGISTRATION
+              value: "true"
+            - name: DISABLE_OIDC_REGISTRATION
+              value: "true"
+            - name: DISABLE_OIDC_USER_MERGE
+              value: "true"
+            - name: DISABLE_PASSWORD_LOGIN
+              value: "false"
+            - name: UPDATE_CHECK_ENABLED
+              value: "false"
+            - name: DEV_MODE
+              value: "false"
+            - name: GOMEMLIMIT
+              value: "128MiB"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: dashlit-secrets
+                  key: JWT_SECRET
+            - name: INITIAL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dashlit-secrets
+                  key: INITIAL_ADMIN_PASSWORD
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /api/auth/config
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /api/auth/config
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /api/auth/config
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 500m
+              memory: 192Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: dashlit-data

@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homelable
+  namespace: homelable
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: homelable
+  template:
+    metadata:
+      labels:
+        app: homelable
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: backend
+        image: ghcr.io/pouzor/homelable-backend:3.4.2@sha256:b6d122e9879a3ade4680a21d0cae485f2382c3e9eecdf8ae1aa8a0a59642f6f0
+        imagePullPolicy: IfNotPresent
+        securityContext: &id001
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - name: backend
+          containerPort: 8000
+        resources:
+          requests:
+            cpu: 25m
+            memory: 96Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        startupProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8000
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8000
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8000
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 5
+        env:
+        - name: AUTH_MODE
+          value: local
+        - name: SQLITE_PATH
+          value: /app/data/homelab.db
+        - name: CORS_ORIGINS
+          value: '["https://homelable.homelab.krymancer.dev"]'
+        - name: SCANNER_RANGES
+          value: '[]'
+        - name: SCANNER_HTTP_RANGES
+          value: '[]'
+        - name: SCANNER_HTTP_PROBE_ENABLED
+          value: 'false'
+        - name: SERVICE_CHECK_ENABLED
+          value: 'false'
+        - name: MCP_SERVICE_KEY
+          value: ''
+        - name: LIVEVIEW_KEY
+          value: ''
+        - name: HOMEPAGE_API_KEY
+          value: ''
+        - name: PROXMOX_SYNC_ENABLED
+          value: 'false'
+        - name: ZIGBEE_SYNC_ENABLED
+          value: 'false'
+        - name: ZWAVE_SYNC_ENABLED
+          value: 'false'
+        - name: AUTH_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: homelable-auth
+              key: AUTH_USERNAME
+        - name: AUTH_PASSWORD_HASH
+          valueFrom:
+            secretKeyRef:
+              name: homelable-auth
+              key: AUTH_PASSWORD_HASH
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homelable-auth
+              key: SECRET_KEY
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+      - name: frontend
+        image: ghcr.io/pouzor/homelable-frontend:3.4.2@sha256:d9115568828e4b72a1960d64936fa92bedd2d9a00ff133b8efc98c7cc0fb0c9d
+        imagePullPolicy: IfNotPresent
+        securityContext: *id001
+        ports:
+        - name: frontend
+          containerPort: 8080
+        resources:
+          requests:
+            cpu: 25m
+            memory: 16Mi
+          limits:
+            cpu: 500m
+            memory: 64Mi
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 5
+        command:
+        - nginx
+        args:
+        - -g
+        - daemon off;
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+          readOnly: true
+        - name: nginx-tmp
+          mountPath: /tmp
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: homelable-data
+      - name: nginx-config
+        configMap:
+          name: homelable-nginx
+      - name: nginx-tmp
+        emptyDir:
+          sizeLimit: 32Mi

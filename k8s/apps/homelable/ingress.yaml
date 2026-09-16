@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homelable
+  namespace: homelable
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: homelable-lan-only@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - homelable.homelab.krymancer.dev
+    secretName: homelab-wildcard-tls
+  rules:
+  - host: homelable.homelab.krymancer.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: homelable
+            port:
+              number: 8080

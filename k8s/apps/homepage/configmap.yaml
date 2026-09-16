@@ -126,6 +126,25 @@ data:
             description: Dashboard
             icon: mdi-chart-box
             siteMonitor: http://hermes-dashboard.default.svc.cluster.local:9119
+    - Trials:
+        - Actual Budget:
+            href: https://actual.homelab.krymancer.dev
+            description: Envelope budgeting trial
+        - DashLit:
+            href: https://dashlit.homelab.krymancer.dev
+            description: Service launcher trial
+        - Homelable:
+            href: https://homelable.homelab.krymancer.dev
+            description: Infrastructure map trial
+        - Termix:
+            href: https://termix.homelab.krymancer.dev
+            description: Server management trial
+        - Reactive Resume:
+            href: https://resume.homelab.krymancer.dev
+            description: Resume builder trial
+        - authentik:
+            href: https://auth.homelab.krymancer.dev
+            description: Identity provider trial
   bookmarks.yaml: |
     []
   docker.yaml: ""
