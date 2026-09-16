@@ -1,5 +1,30 @@
 # Monitoring (Grafana / Prometheus)
 
+## Lean monitoring runtime
+
+Grafana runs without dashboard/datasource watcher sidecars. Its Prometheus
+datasource is provisioned by Helm; the three dashboard ConfigMaps mount as whole
+directories (no subPath), and Grafana scans them every 60 seconds after kubelet
+projects updates. Adding another dashboard ConfigMap requires a Helm mount entry.
+Datasource/provider changes require a Grafana rollout. Existing dashboard UIDs
+and the default home dashboard are preserved.
+
+The apiserver scrape drops histogram `_bucket` series (including the embedded
+k3s registry); basic counters, up/health, cAdvisor, node and workload metrics remain.
+API-server SLO/latency and etcd default rule groups are disabled because their
+histograms are no longer collected. The three custom dashboards do not use them.
+
+Prometheus uses `GOMEMLIMIT=320MiB` with `--no-auto-gomemlimit`. This is a soft
+Go runtime memory target, NOT a hard RSS/container ceiling; mmap, native memory,
+queries and unavoidable live data may exceed it. Automatic memory detection is
+disabled so the host-sized limit does not override this target. Monitor CPU/GC,
+query errors, target health and total namespace RAM; keep 15-day history intact.
+For Prometheus 3.11.2 the boolean flag must be `--no-auto-gomemlimit`, not
+`--auto-gomemlimit=false` (the latter fails at startup).
+
+Rollback: inspect `helm history kube-prom -n monitoring` and roll back to the
+last known healthy revision. Never delete TSDB/WAL data to improve a RAM snapshot.
+
 ## Homelab collection budget
 
 Regular scrapes and rule evaluations run every 60 seconds. The kubelet interval
@@ -23,7 +48,7 @@ kube-prometheus-stack is a **one-shot Helm release** named `kube-prom` in namesp
 
 GitOps covers **extras only** (exporters, Probe/ServiceMonitor CRs, dashboard ConfigMaps) via Application `monitoring` → `k8s/apps/monitoring/extras`. Helm values for the stack live here as `values.yaml` and are applied with `helm upgrade`.
 
-Grafana login stays chart default **`admin` / `admin`** (do not change it in this tree). Datasource UID is `prometheus` (`grafana.sidecar.datasources.uid`).
+Grafana login stays chart default **`admin` / `admin`** (do not change it in this tree). Datasource UID is `prometheus` (static `grafana.datasources` provisioning).
 
 The daily driver is Homepage at [https://home.homelab.krymancer.dev](https://home.homelab.krymancer.dev). Grafana’s home dashboard is the **Alt / Homelab Host** overview (`alt-homelab-host`), not a replacement for Homepage.
 
@@ -106,15 +131,15 @@ Allow **9100/tcp** from the k3s VM (`192.168.0.20`) if the PVE firewall is on. O
 
 ## Dashboards (ConfigMaps `grafana_dashboard=1`, folder Homelab)
 
-Sidecar loads these after Grafana is up. Folder annotation is `grafana_folder: Homelab` (enabled in `values.yaml`).
+Grafana loads these through direct ConfigMap mounts and the `homelab` file provider in `values.yaml`; no sidecars run. The legacy labels/annotations remain harmless metadata.
 
-Grafana home (the `/` landing dashboard after login) is **Alt / Homelab Host**. Chart **83.4.2** uses Grafana subchart **11.6.1**, which documents `sidecar.dashboards.folder: /tmp/dashboards` and passes `grafana.ini` through. Combined with sidecar **2.6.0** joining the relative `grafana_folder` annotation, that file is:
+Grafana home (the `/` landing dashboard after login) is **Alt / Homelab Host**. Its directly mounted file is:
 
-`/tmp/dashboards/Homelab/alt-homelab-host.json`
+`/var/lib/grafana/dashboards/homelab/alt/alt-homelab-host.json`
 
 That path is set in `values.yaml` as `grafana.grafana.ini.dashboards.default_home_dashboard_path` so it survives `helm upgrade`. It is the server default when org/user prefs do not already pin a home dashboard.
 
-If the Grafana PVC already stored a different org home, `grafana.ini` does not override it. After the sidecar has imported UID `alt-homelab-host`, patch org prefs (does not change the admin password):
+If the Grafana PVC already stored a different org home, `grafana.ini` does not override it. After the file provider has imported UID `alt-homelab-host`, patch org prefs (does not change the admin password):
 
 ```bash
 curl -sS -X PATCH -u admin:admin \
