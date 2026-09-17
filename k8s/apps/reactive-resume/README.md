@@ -1,4 +1,18 @@
-# Reactive Resume trial
+# Reactive Resume — retained service
+
+## Retained service status
+
+Permanent homelab service, managed by the existing ArgoCD app-of-apps from
+`main` in this repository. Retention changes documentation and launcher categories
+only: existing accounts, data, PVCs, encryption keys, Secret names (including any
+`trial-secrets`), pinned images and LAN/Tailscale-only access remain unchanged.
+Bootstrap instructions below are for initial installation/recovery, **not** steps
+to rerun on the retained installation. Existing integrations remain as configured;
+no SSO conversion, banking import, paid inference or AI Agent enablement is implied.
+
+Persistence is not a backup. This promotion adds no backup schedule, independent
+backup destination, restore test, HA or production-readiness guarantee. Retain
+application data and its matching credentials/encryption material together.
 
 ## Pinned, minimal deployment
 
@@ -7,7 +21,7 @@
 - Database: independent `postgres:16.15-bookworm`, pinned by OCI index digest in `postgres.yaml`.
 - Two containers only: app + PostgreSQL. **No Browserless/Chromium, Redis, S3/MinIO/SeaweedFS**.
   The *released v5.3.0 documentation*, not main, explicitly says browser-side PDF generation replaced Browserless in v5.1.0.
-  Redis/S3 are optional for core resume creation; the AI Agent workspace is intentionally unavailable in this minimal trial.
+  Redis/S3 are optional for core resume creation; the AI Agent workspace is intentionally unavailable in this minimal deployment.
 - Local uploads: `resume-data` 5Gi at `/app/data`; database: `postgres-data` 10Gi.
 - All PVCs use `local-path` with `Prune=false,Delete=false` for ArgoCD. Local-path is node-local and NOT a backup;
   manually deleting the PVC can delete its data. Database and uploads both need backup before upgrades.
@@ -21,7 +35,7 @@ Use this directory as a plain ArgoCD Directory source (no Helm/Kustomize renderi
 Requires the existing k3s `local-path` provisioner, Traefik IngressClass `traefik`, namespace TLS Secret
 `homelab-wildcard-tls`, and LAN/Tailscale DNS `resume.homelab.krymancer.dev` pointing to the LAN ingress.
 The parent infrastructure owns DNS, certificate reflection, and the ArgoCD Application.
-Do not expose this trial through public tunnel routes or integrate any existing logins.
+Do not expose this service through public tunnel routes or integrate any existing logins.
 
 Secrets are deliberately **not** GitOps resources. From the repository root:
 
@@ -98,7 +112,7 @@ If credentials are changed later, changing the Secret alone does not change Post
 Coordinate SQL credential changes and consumer restarts; the provisioning script deliberately refuses rotation.
 Rollback app images only when DB migrations are backwards-compatible; otherwise restore a verified DB/uploads backup.
 
-## Evidence and preparation checks
+## Historical preparation checks
 
 Registry OCI manifests were fetched successfully for all exact tags/digests (amd64 and arm64 available).
 YAML parsed and all resources passed live Kubernetes server-side dry-run. Secret provisioning and its repeat run passed,

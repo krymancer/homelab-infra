@@ -1,4 +1,18 @@
-# authentik standalone trial
+# authentik standalone retained service
+
+## Retained service status
+
+Permanent homelab service, managed by the existing ArgoCD app-of-apps from
+`main` in this repository. Retention changes documentation and launcher categories
+only: existing accounts, data, PVCs, encryption keys, Secret names (including any
+`trial-secrets`), pinned images and LAN/Tailscale-only access remain unchanged.
+Bootstrap instructions below are for initial installation/recovery, **not** steps
+to rerun on the retained installation. Existing integrations remain as configured;
+no SSO conversion, banking import, paid inference or AI Agent enablement is implied.
+
+Persistence is not a backup. This promotion adds no backup schedule, independent
+backup destination, restore test, HA or production-readiness guarantee. Retain
+application data and its matching credentials/encryption material together.
 
 ## Pinned deployment and isolation
 
@@ -17,16 +31,16 @@
 - Each authentik process gets a 512Mi memory-backed `/dev/shm`, as in the upstream Compose recommendation.
   Its actual use counts against each container memory limit. Web workers=2, background worker processes=1/threads=2.
 - Memory requests: server 768Mi + worker 768Mi + DB 256Mi. Limits: server 1536Mi + worker 1536Mi + DB 768Mi.
-  CPU requests: 200m/200m/100m; CPU limits: 2/2/1 cores. These are trial budgets, not guarantees under load.
-  The two trials together request **2.5Gi** RAM and permit **5.5Gi** maximum container RAM.
-  Roll out sequentially and measure node capacity before adding the other trial apps.
+  CPU requests: 200m/200m/100m; CPU limits: 2/2/1 cores. These are initial resource budgets, not guarantees under load.
+  authentik and Reactive Resume together request **2.5Gi** RAM and permit **5.5Gi** maximum container RAM.
+  Roll out sequentially and measure node capacity before adding the other apps.
 
 ## Prerequisites / GitOps
 
 Use this directory as a plain ArgoCD Directory source. Requires Traefik (`ingressClassName: traefik`),
 `local-path`, `authentik/homelab-wildcard-tls`, and LAN/Tailscale DNS `auth.homelab.krymancer.dev` pointing to ingress.
 The parent infrastructure owns ArgoCD Application creation, DNS and certificate reflection.
-No public tunnel route should be added for this trial.
+No public tunnel route should be added for this service.
 TLS terminates at Traefik and forwards HTTP 9000 to the server. PostgreSQL is ClusterIP-only;
 `AUTHENTIK_POSTGRESQL__SSLMODE=disable` is explicit for this private, same-node non-TLS PostgreSQL.
 No SMTP or external identity source is configured. Error reporting is off.
@@ -56,7 +70,7 @@ It holds the generated `login_password`, username `akadmin`, and the Secret reco
 2. Open **https://auth.homelab.krymancer.dev** and sign in as **akadmin** with the private file's `login_password`.
    The documented automated bootstrap skips initial password setup. Do not create a second admin through a public setup flow.
 3. Set your admin email and enroll MFA. Test logout/login before configuring anything else.
-4. Keep it a standalone trial: do not add production providers, sources, proxy integrations or outposts.
+4. Keep it a standalone retained service: do not add production providers, sources, proxy integrations or outposts.
    SMTP/password recovery requires explicit future configuration; keep the private recovery file secure.
 5. Bootstrap password hashes are read only on first initialization. Changing this Secret later does **not** reset an
    existing admin's password. Use authentik's documented recovery procedure if necessary.
@@ -81,12 +95,13 @@ Back up PostgreSQL, `/data`, and the private recovery file before upgrading. Rec
 Rolling back only an image does not roll back database migrations. Restore a matching verified backup when required.
 Never rotate PostgreSQL credentials only by changing the Secret; coordinate the database change and consumer restarts.
 
-## Evidence and preparation checks
+## Historical preparation checks
 
 All exact image tags/digests were resolved from the registries, including amd64/arm64 manifests.
 YAML parsed and all resources passed Kubernetes server-side dry-run. Provisioning and repeat provisioning passed;
 Secret contents were compared in memory without printing them. Only namespaces and Secrets were changed live.
-No workload was deployed; live bootstrap, storage binding, TLS and login remain parent rollout acceptance checks.
+No workload was deployed during preparation. The retained installation is now deployed
+through ArgoCD; preparation checks are not claims of current login/restore testing.
 
 Official release-specific references:
 - https://github.com/goauthentik/authentik/releases/tag/version/2026.8.2
