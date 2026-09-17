@@ -18,8 +18,7 @@ spec:
         app: paperless
     spec:
       enableServiceLinks: false
-      securityContext:
-        fsGroup: 1000
+
       initContainers:
         - name: wait-for-deps
           image: docker.io/library/busybox:1.37
@@ -81,10 +80,14 @@ spec:
               value: "1"
             - name: PAPERLESS_TASK_WORKERS
               value: "1"
+            # NFS does not deliver remote filesystem notifications.
+            - name: PAPERLESS_CONSUMER_POLLING_INTERVAL
+              value: "10"
             - name: USERMAP_UID
               value: "1000"
             - name: USERMAP_GID
-              value: "1000"
+              # NAS Samba forces group nas (988); preserve SMB write access.
+              value: "988"
           ports:
             - containerPort: 8000
               protocol: TCP
@@ -116,5 +119,7 @@ spec:
           persistentVolumeClaim:
             claimName: paperless-media
         - name: consume
-          persistentVolumeClaim:
-            claimName: paperless-consume
+          nfs:
+            server: 192.168.0.11
+            path: /mnt/nas/share/paperless/consume
+            readOnly: false
