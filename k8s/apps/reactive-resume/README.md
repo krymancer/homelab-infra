@@ -41,6 +41,38 @@ Private recovery file, mode **0600**, parent directory **0700**:
 It includes the database/auth keys and a generated `login_password` for the UI signup.
 Read it only in a private local editor/password manager; do not paste it into chats, logs or Git.
 
+## Saved AI-provider credential encryption
+
+The app also requires the out-of-band Secret `reactive-resume-ai-encryption`, key
+`ENCRYPTION_SECRET`, before its Deployment can start. v5.3.0 requires at least
+32 characters; use a dedicated cryptographically random 32-byte hex value (64 characters).
+Do not reuse or rotate `AUTH_SECRET` or database credentials to satisfy this requirement.
+The deployment references the Secret through `secretKeyRef`; no key belongs in Git.
+
+Before creating this Secret, inspect existing encryption references and key presence.
+Reuse existing encryption material if present; **never overwrite or casually rotate it**:
+saved provider credentials depend on this key and can become unreadable if it changes.
+Generate only when absent, write a private durable backup **before rollout**, then create
+using stdin (not CLI arguments or secret-bearing apply annotations). Verify exact key
+read-back in memory without printing it. Keep the backup with database recovery material;
+copy it to an approved independent encrypted backup destination for disaster recovery.
+The local recovery copy alone does not protect against loss of this host.
+
+Private recovery file (0600 in a 0700 directory; never commit or paste its contents):
+`/home/junho/.hermes/profiles/warden/homelab-app-trials/encryption-backup/reactive-resume-ai-encryption.json`
+
+The original `provision-secrets.py` does not create this additional Secret. On recovery,
+restore its backed-up value before syncing the Deployment; do not generate a replacement
+for a database containing encrypted provider credentials. Deploy workload changes only
+through a PR merged into ArgoCD's tracked `main`, then verify exact revision and readiness.
+
+This restores the provider-settings management prerequisite. Verify normal login and
+`GET /api/auth/get-session`, then authenticated `GET /api/rpc/aiProviders/list` returns 200;
+health checks alone do not establish that provider settings work. Saving/testing provider
+keys, inference, and uploads are separate operations and are not performed by this fix.
+The full AI Agent workspace remains unavailable: **Redis and S3-compatible private storage
+are not configured**. No Redis/S3 services are added for provider management.
+
 ## User bootstrap after parent GitOps rollout
 
 1. Wait for PostgreSQL and app readiness; the app automatically applies DB migrations at startup.

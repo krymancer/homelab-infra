@@ -50,6 +50,11 @@ spec:
             secretKeyRef:
               name: trial-secrets
               key: AUTH_SECRET
+        - name: ENCRYPTION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: reactive-resume-ai-encryption
+              key: ENCRYPTION_SECRET
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
