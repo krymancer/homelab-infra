@@ -1,4 +1,18 @@
-# DashLit — standalone trial
+# DashLit — standalone retained service
+
+## Retained service status
+
+Permanent homelab service, managed by the existing ArgoCD app-of-apps from
+`main` in this repository. Retention changes documentation and launcher categories
+only: existing accounts, data, PVCs, encryption keys, Secret names (including any
+`trial-secrets`), pinned images and LAN/Tailscale-only access remain unchanged.
+Bootstrap instructions below are for initial installation/recovery, **not** steps
+to rerun on the retained installation. Existing integrations remain as configured;
+no SSO conversion, banking import, paid inference or AI Agent enablement is implied.
+
+Persistence is not a backup. This promotion adds no backup schedule, independent
+backup destination, restore test, HA or production-readiness guarantee. Retain
+application data and its matching credentials/encryption material together.
 
 Stable release **v1.1.1**, not the moving main/dev tag:
 `ghcr.io/codewec/dashlit:v1.1.1@sha256:41b33c90d8ee8cd7ba469b181fb5ffb8cc2e4a2c35755ef1abb8fd6fe386500c`.
@@ -47,10 +61,10 @@ bootstrap password and restore both env entries before startup.
 
 Update checks are disabled (`UPDATE_CHECK_ENABLED=false`). No monitoring targets,
 OIDC, SSH, or external integrations are configured. Upstream icon searches can
-contact Iconify/selfh.st when used; avoid them for a network-isolated trial.
+contact Iconify/selfh.st when used; avoid them for a network-isolated deployment.
 This configuration does not impose an egress NetworkPolicy.
 
-## GitOps integration prerequisites
+## Initial-installation GitOps prerequisites (historical preparation)
 
 - Parent owns the Argo Application and private Pi-hole records pointing at
   `192.168.0.20`; do not add a Cloudflare Tunnel or public router forwarding.
@@ -68,7 +82,8 @@ This configuration does not impose an egress NetworkPolicy.
   X-Forwarded-For. A private DNS record alone is not access control; do not
   publicly expose this ingress controller through a source-NAT proxy.
 - Namespace and any documented app Secret were pre-created; workloads, PVC,
-  Service, Middleware and Ingress were **not** applied.
+  Service, Middleware and Ingress were not applied during that preparation step.
+  The retained installation is now deployed through its tracked Argo Application.
 
 ## Persistence, sizing and rollback
 
@@ -82,7 +97,7 @@ backup if a migration is not backward-compatible. Do not delete the namespace
 as an ordinary rollback. No SSH credentials or external integration credentials
 are configured.
 
-## Validation performed
+## Historical preparation validation
 
 `kubectl kustomize k8s/apps/dashlit` and
 `kubectl apply --dry-run=server -k k8s/apps/dashlit` passed on the live k3s context.

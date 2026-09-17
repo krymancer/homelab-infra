@@ -1,5 +1,19 @@
 # Termix 2.7.1
 
+## Retained service status
+
+Permanent homelab service, managed by the existing ArgoCD app-of-apps from
+`main` in this repository. Retention changes documentation and launcher categories
+only: existing accounts, data, PVCs, encryption keys, Secret names (including any
+`trial-secrets`), pinned images and LAN/Tailscale-only access remain unchanged.
+Bootstrap instructions below are for initial installation/recovery, **not** steps
+to rerun on the retained installation. Existing integrations remain as configured;
+no SSO conversion, banking import, paid inference or AI Agent enablement is implied.
+
+Persistence is not a backup. This promotion adds no backup schedule, independent
+backup destination, restore test, HA or production-readiness guarantee. Retain
+application data and its matching credentials/encryption material together.
+
 Image uses `ghcr.io/lukegus/termix:release-2.7.1`, the publishing path verified in the
 **Termix-SSH/Termix** release workflow (the Helm repository default differs).
 SQLite/state on a 2Gi local-path PVC; requests 192Mi / limit 512Mi. Only the web
@@ -68,7 +82,7 @@ No speculative unsupported disable flags or upstream patches are applied.
 - Backup the PVC AND application Secret. `local-path` is node-local, not replicated;
   PVC deletion can delete the data. Single replica and Recreate avoid SQLite/RWO races.
 - After rollout, verify startup, login, TLS, persistence across restart and memory
-  usage. Resource limits are conservative trial limits, not upstream guarantees.
+  usage. Resource limits are conservative initial resource limits, not upstream guarantees.
 
 No host networking, privilege escalation, Linux capabilities, host mounts, Docker
 socket, Kubernetes token, remote SSH keys, or Proxmox credentials are supplied.

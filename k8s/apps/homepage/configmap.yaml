@@ -63,6 +63,12 @@ data:
             description: DNS + ad blocking
             icon: pi-hole
             siteMonitor: http://pihole-web.pihole.svc.cluster.local:80/admin/
+        - Homelable:
+            href: https://homelable.homelab.krymancer.dev
+            description: Infrastructure map
+        - Termix:
+            href: https://termix.homelab.krymancer.dev
+            description: Server management
     - Monitoring:
         - Grafana:
             href: https://grafana.homelab.krymancer.dev
@@ -74,12 +80,10 @@ data:
             description: Metrics
             icon: prometheus
             siteMonitor: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+        - DashLit:
+            href: https://dashlit.homelab.krymancer.dev
+            description: Service launcher
     - Tools:
-        - Vaultwarden:
-            href: https://vault.homelab.krymancer.dev
-            description: Password manager
-            icon: vaultwarden
-            siteMonitor: http://vaultwarden.vaultwarden.svc.cluster.local:80
         - Uptime Kuma:
             href: https://uptime.homelab.krymancer.dev
             description: Uptime monitoring
@@ -100,11 +104,6 @@ data:
             description: HTTP proxy (paywall/CORS)
             icon: mdi-ladder
             siteMonitor: http://ladder.ladder.svc.cluster.local:8080
-        - hledger:
-            href: https://hledger.homelab.krymancer.dev
-            description: Plain-text accounting
-            icon: mdi-book-open-page-variant
-            siteMonitor: http://hledger.hledger.svc.cluster.local:5000
         - Excalidraw:
             href: https://draw.homelab.krymancer.dev
             description: Whiteboard
@@ -126,25 +125,27 @@ data:
             description: Dashboard
             icon: mdi-chart-box
             siteMonitor: http://hermes-dashboard.default.svc.cluster.local:9119
-    - Trials:
-        - Actual Budget:
-            href: https://actual.homelab.krymancer.dev
-            description: Envelope budgeting trial
-        - DashLit:
-            href: https://dashlit.homelab.krymancer.dev
-            description: Service launcher trial
-        - Homelable:
-            href: https://homelable.homelab.krymancer.dev
-            description: Infrastructure map trial
-        - Termix:
-            href: https://termix.homelab.krymancer.dev
-            description: Server management trial
         - Reactive Resume:
             href: https://resume.homelab.krymancer.dev
-            description: Resume builder trial
+            description: Resume builder
+    - Finance:
+        - Actual Budget:
+            href: https://actual.homelab.krymancer.dev
+            description: Envelope budgeting
+        - hledger:
+            href: https://hledger.homelab.krymancer.dev
+            description: Plain-text accounting
+            icon: mdi-book-open-page-variant
+            siteMonitor: http://hledger.hledger.svc.cluster.local:5000
+    - Security:
         - authentik:
             href: https://auth.homelab.krymancer.dev
-            description: Identity provider trial
+            description: Identity provider
+        - Vaultwarden:
+            href: https://vault.homelab.krymancer.dev
+            description: Password manager
+            icon: vaultwarden
+            siteMonitor: http://vaultwarden.vaultwarden.svc.cluster.local:80
   bookmarks.yaml: |
     []
   docker.yaml: ""

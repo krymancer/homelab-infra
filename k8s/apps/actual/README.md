@@ -1,4 +1,18 @@
-# Actual Budget — isolated trial
+# Actual Budget — retained service
+
+## Retained service status
+
+Permanent homelab service, managed by the existing ArgoCD app-of-apps from
+`main` in this repository. Retention changes documentation and launcher categories
+only: existing accounts, data, PVCs, encryption keys, Secret names (including any
+`trial-secrets`), pinned images and LAN/Tailscale-only access remain unchanged.
+Bootstrap instructions below are for initial installation/recovery, **not** steps
+to rerun on the retained installation. Existing integrations remain as configured;
+no SSO conversion, banking import, paid inference or AI Agent enablement is implied.
+
+Persistence is not a backup. This promotion adds no backup schedule, independent
+backup destination, restore test, HA or production-readiness guarantee. Retain
+application data and its matching credentials/encryption material together.
 
 Stable release checked against upstream releases and **v26.9.0** source:
 `ghcr.io/actualbudget/actual:26.9.0-alpine@sha256:1c14eef351234f4b5dd0433865b5de89d70bdbdc57368d5b07e910662c6498f9`.
@@ -6,7 +20,7 @@ Alpine variant, non-root UID/GID 1001, port 5006; upstream `/health` probes.
 Requests: 25m CPU / 128Mi; limits: 500m / 512Mi. PVC: `actual-data`, 2Gi.
 
 This is independent of hledger: no existing journal, NAS mount, bank integration,
-or migration is included. Create a new disposable budget, not an import.
+or migration is included. Existing budgets are retained; retention does not authorize imports or financial migration.
 
 ## First bootstrap (required before allowing other users)
 
@@ -27,12 +41,12 @@ kustomization includes the final ingress. **Do not initially sync the entire
 kustomization on a LAN with untrusted clients**: first visitor can claim an
 uninitialized server. No signups remain once the password bootstrap is complete.
 
-Open `https://actual.homelab.krymancer.dev`, authenticate, create a new trial budget,
+Open `https://actual.homelab.krymancer.dev`, authenticate, use an existing budget or deliberately create a separate budget,
 reload, and verify persistence. HTTPS is needed for browser SharedArrayBuffer /
 cross-origin-isolation support; preserve upstream COOP/COEP response headers.
 No custom proxy headers are necessary for the stock server.
 
-## GitOps integration prerequisites
+## Initial-installation GitOps prerequisites (historical preparation)
 
 - Parent owns the Argo Application and private Pi-hole records pointing at
   `192.168.0.20`; do not add a Cloudflare Tunnel or public router forwarding.
@@ -50,7 +64,8 @@ No custom proxy headers are necessary for the stock server.
   X-Forwarded-For. A private DNS record alone is not access control; do not
   publicly expose this ingress controller through a source-NAT proxy.
 - Namespace and any documented app Secret were pre-created; workloads, PVC,
-  Service, Middleware and Ingress were **not** applied.
+  Service, Middleware and Ingress were not applied during that preparation step.
+  The retained installation is now deployed through its tracked Argo Application.
 
 ## Persistence, sizing and rollback
 
@@ -64,7 +79,7 @@ backup if a migration is not backward-compatible. Do not delete the namespace
 as an ordinary rollback. No SSH credentials or external integration credentials
 are configured.
 
-## Validation performed
+## Historical preparation validation
 
 `kubectl kustomize k8s/apps/actual` and
 `kubectl apply --dry-run=server -k k8s/apps/actual` passed on the live k3s context.

@@ -1,5 +1,19 @@
 # Homelable 3.4.2
 
+## Retained service status
+
+Permanent homelab service, managed by the existing ArgoCD app-of-apps from
+`main` in this repository. Retention changes documentation and launcher categories
+only: existing accounts, data, PVCs, encryption keys, Secret names (including any
+`trial-secrets`), pinned images and LAN/Tailscale-only access remain unchanged.
+Bootstrap instructions below are for initial installation/recovery, **not** steps
+to rerun on the retained installation. Existing integrations remain as configured;
+no SSO conversion, banking import, paid inference or AI Agent enablement is implied.
+
+Persistence is not a backup. This promotion adds no backup schedule, independent
+backup destination, restore test, HA or production-readiness guarantee. Retain
+application data and its matching credentials/encryption material together.
+
 Full backend + web UI, SQLite/uploads on a 1Gi local-path PVC. Both containers share
 one pod; a small nginx ConfigMap proxies API/WebSocket traffic over loopback rather
 than relying on the Docker-only `backend` DNS name. Port 8080 permits non-root nginx.
@@ -48,7 +62,7 @@ browser-side fetching external diagram/icon URLs is not controlled by this polic
 - Backup the PVC AND application Secret. `local-path` is node-local, not replicated;
   PVC deletion can delete the data. Single replica and Recreate avoid SQLite/RWO races.
 - After rollout, verify startup, login, TLS, persistence across restart and memory
-  usage. Resource limits are conservative trial limits, not upstream guarantees.
+  usage. Resource limits are conservative initial resource limits, not upstream guarantees.
 
 No host networking, privilege escalation, Linux capabilities, host mounts, Docker
 socket, Kubernetes token, or remote SSH keys are supplied. Only the dedicated
