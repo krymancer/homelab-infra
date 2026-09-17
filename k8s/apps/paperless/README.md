@@ -22,7 +22,26 @@ kubectl -n paperless rollout restart deploy/postgres deploy/paperless
 ```
 
 Admin user/password are applied only on first start (existing users are not
-reset). Drop files into the consume PVC (`paperless-consume`) to import them.
+reset).
+
+## NAS inbox
+
+Drop documents into `\\\\192.168.0.11\\nas\\paperless\\consume`
+(macOS: `smb://192.168.0.11/nas`, then `paperless/consume`). The NAS path
+`/mnt/nas/share/paperless/consume` is mounted by NFS at
+`/usr/src/paperless/consume`. Polling runs every 10 seconds because remote NFS
+writes do not emit local filesystem notifications. Successfully imported files
+are removed from this inbox; document data/media remain on the existing PVCs.
+
+NAS prerequisites: the existing `/mnt/nas/share` NFS export allows k3s, and
+`paperless/consume` is created with owner/group `nas:nas` and mode `2775`.
+The application keeps UID 1000 but uses NAS GID 988 so Samba's forced `nas`
+user/group can write files and Paperless can consume/delete them. Do not set
+pod `fsGroup` to recursively change NAS permissions.
+
+The original `paperless-consume` PVC is retained, empty at cutover. Rollback:
+revert the deployment change in Git to remount that PVC; first preserve any
+pending files in the NAS inbox.
 
 Office/email conversion (Tika + Gotenberg) is not included; add later if needed.
 Authelia is out of scope for this v1.
