@@ -170,6 +170,8 @@ spec:
       - name: bootstrap
         configMap:
           name: compass-bootstrap
+      imagePullSecrets:
+      - name: ghcr-pull
       automountServiceAccountToken: false
 ---
 apiVersion: v1
