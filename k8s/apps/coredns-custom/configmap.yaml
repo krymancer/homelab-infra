@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  llm.server: |
+    llm.homelab.krymancer.dev:53 {
+      errors
+      cache 30
+      forward . 10.43.156.196
+    }
