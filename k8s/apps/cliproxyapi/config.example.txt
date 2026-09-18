@@ -1,0 +1,31 @@
+host: ""
+port: 8317
+auth-dir: /auth
+remote-management:
+  allow-remote: false
+  secret-key: ""
+  disable-control-panel: true
+  disable-auto-update-panel: true
+api-keys:
+  - API_KEY_PLACEHOLDER
+debug: false
+commercial-mode: true
+request-log: false
+logging-to-file: false
+logs-max-total-size-mb: 10
+error-logs-max-files: 1
+usage-statistics-enabled: false
+request-retry: 1
+max-retry-credentials: 1
+max-retry-interval: 5
+auth-auto-refresh-workers: 2
+quota-exceeded:
+  switch-project: false
+  switch-preview-model: false
+  antigravity-credits: false
+pprof:
+  enable: false
+discovery:
+  enabled: false
+plugins:
+  enabled: false
