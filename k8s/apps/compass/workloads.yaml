@@ -99,7 +99,7 @@ spec:
         fsGroup: 1000
       containers:
       - name: compass
-        image: ghcr.io/krymancer/compass@sha256:9a7bb70bc01f1f1f6a4b3373d46b8d54bfad10a861847872bcad96f66f5ff8b2
+        image: ghcr.io/krymancer/compass@sha256:d59bbafd6e76328d342ec5ef33f416c6a6f7df40eed8ebcd101cff4f1b025772
         ports:
         - containerPort: 8080
           name: http
