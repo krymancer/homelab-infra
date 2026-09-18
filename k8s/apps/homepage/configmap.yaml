@@ -115,6 +115,10 @@ data:
             icon: paperless-ngx
             siteMonitor: http://paperless.paperless.svc.cluster.local:8000
     - Apps:
+        - Compass:
+            href: https://compass.homelab.krymancer.dev
+            description: Job pipeline (automation disabled)
+            icon: mdi-compass
         - Job Applications:
             href: https://jobs.homelab.krymancer.dev
             description: Job tracker

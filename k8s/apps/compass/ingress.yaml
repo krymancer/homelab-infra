@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: compass
+  namespace: compass
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: compass-lan-only@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - compass.homelab.krymancer.dev
+    secretName: homelab-wildcard-tls
+  rules:
+  - host: compass.homelab.krymancer.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: compass
+            port:
+              number: 8080

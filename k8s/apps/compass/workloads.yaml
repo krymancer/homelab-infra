@@ -1,0 +1,223 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: compass
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compass-postgres
+  namespace: compass
+spec:
+  selector:
+    app: compass-postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: compass-postgres
+  namespace: compass
+spec:
+  serviceName: compass-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compass-postgres
+  template:
+    metadata:
+      labels:
+        app: compass-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:17-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: compass
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: compass-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: compass-secrets
+              key: POSTGRES_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - compass
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compass
+  namespace: compass
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: compass
+  template:
+    metadata:
+      labels:
+        app: compass
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: compass
+        image: ghcr.io/krymancer/compass@sha256:e91a616ab3181d0615f0e4acaf33c61cf8ee87c2c1d4d675224b2ad7fa99ef2f
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: PORT
+          value: '8080'
+        - name: COMPASS_ROLE
+          value: api
+        - name: CODEX_HOME
+          value: /codex
+        - name: NAS_ROOT
+          value: /data/compass-local
+        - name: WORKER_CONCURRENCY
+          value: '2'
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: compass-secrets
+              key: DATABASE_URL
+        - name: COMPASS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: compass-secrets
+              key: COMPASS_TOKEN
+        volumeMounts:
+        - name: codex-home
+          mountPath: /codex
+        - name: nas
+          mountPath: /data/compass-local
+        - name: bootstrap
+          mountPath: /bootstrap
+          readOnly: true
+        readinessProbe:
+          periodSeconds: 10
+          exec:
+            command:
+            - sh
+            - -c
+            - 'curl -fsS -H "Authorization: Bearer $COMPASS_TOKEN" http://127.0.0.1:8080/api/health
+              >/dev/null'
+        livenessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 30
+          exec:
+            command:
+            - sh
+            - -c
+            - 'curl -fsS -H "Authorization: Bearer $COMPASS_TOKEN" http://127.0.0.1:8080/api/health
+              >/dev/null'
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        command:
+        - sh
+        - -c
+        args:
+        - bun run /bootstrap/safe-init.ts && exec bun run apps/api/src/index.ts
+      volumes:
+      - name: codex-home
+        persistentVolumeClaim:
+          claimName: compass-codex-home
+      - name: nas
+        persistentVolumeClaim:
+          claimName: compass-local-data
+      - name: bootstrap
+        configMap:
+          name: compass-bootstrap
+      automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: compass-codex-home
+  namespace: compass
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: compass-local-data
+  namespace: compass
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compass
+  namespace: compass
+spec:
+  selector:
+    app: compass
+  ports:
+  - port: 80
+    targetPort: http
+    name: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: compass-bootstrap
+  namespace: compass
+data:
+  safe-init.ts: "import { runMigrations } from \"/app/packages/db/src/migrate\";\n\
+    import { createDb, settings } from \"/app/packages/db/src/index\";\nawait runMigrations(process.env.DATABASE_URL!);\n\
+    const db = createDb(process.env.DATABASE_URL!);\nfor (const [section,value] of\
+    \ Object.entries({pipeline:{autoTailor:false,autoPublish:false,autoIngestDiscovered:false},email:{enabled:false,autoApply:false},sweeps:{cron:\"\
+    \"},llmShim:{enabled:false}})) {\n await db.insert(settings).values({section,value}).onConflictDoUpdate({target:settings.section,set:{value}});\n\
+    }\nprocess.exit(0);\n"
