@@ -99,7 +99,7 @@ spec:
         fsGroup: 1000
       containers:
       - name: compass
-        image: ghcr.io/krymancer/compass@sha256:e91a616ab3181d0615f0e4acaf33c61cf8ee87c2c1d4d675224b2ad7fa99ef2f
+        image: ghcr.io/krymancer/compass@sha256:fda6d93950b5f0fd7b75166607cb2899813ce4ae884fa5b25e31e169849f4767
         ports:
         - containerPort: 8080
           name: http
@@ -221,5 +221,5 @@ data:
     import { createDb, settings } from \"/app/packages/db/src/index\";\nawait runMigrations(process.env.DATABASE_URL!);\n\
     const db = createDb(process.env.DATABASE_URL!);\nfor (const [section,value] of\
     \ Object.entries({pipeline:{autoTailor:false,autoPublish:false,autoIngestDiscovered:false},email:{enabled:false,autoApply:false},sweeps:{cron:\"\
-    \"},llmShim:{enabled:false}})) {\n await db.insert(settings).values({section,value}).onConflictDoUpdate({target:settings.section,set:{value}});\n\
+    \"},llmShim:{enabled:false}})) {\n await db.insert(settings).values({section,value}).onConflictDoNothing();\n\
     }\nprocess.exit(0);\n"
