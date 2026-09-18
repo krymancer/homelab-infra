@@ -107,7 +107,7 @@ spec:
         - name: PORT
           value: '8080'
         - name: COMPASS_ROLE
-          value: api
+          value: all
         - name: CODEX_HOME
           value: /codex
         - name: NAS_ROOT
