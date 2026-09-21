@@ -74,7 +74,11 @@ spec:
         - name: NODE_ENV
           value: production
         - name: ENABLE_GUACAMOLE
-          value: 'false'
+          value: 'true'
+        - name: GUACD_HOST
+          value: 127.0.0.1
+        - name: GUACD_PORT
+          value: '4822'
         - name: ENABLE_TELEMETRY
           value: 'false'
         - name: ENABLE_SSL
@@ -104,8 +108,52 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /app/data
-        # Only Termix uses the loopback resolver. Sidecars retain ClusterFirst DNS
-        # so Tailscale enrollment/control-plane lookup cannot recurse into itself.
+        # Termix http and guacd use the loopback resolver for tailnet hostnames.
+        # Tailscale sidecars retain ClusterFirst DNS so enrollment/control-plane
+        # lookup cannot recurse into itself.
+        - name: tailscale-dns
+          mountPath: /etc/resolv.conf
+          subPath: resolv.conf
+          readOnly: true
+      - name: guacd
+        # Official image USER guacd is UID/GID 1000; no extra capabilities.
+        image: guacamole/guacd:1.6.0@sha256:8974eaa9ba32f713daf311e7cc8cd7e4cdfba1edea39eed75524e78ef4b08f4f
+        imagePullPolicy: IfNotPresent
+        # Override the image entrypoint bind of 0.0.0.0; loopback-only, no Service.
+        command: [/opt/guacamole/sbin/guacd]
+        args:
+        - -f
+        - -b
+        - 127.0.0.1
+        - -L
+        - info
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        readinessProbe:
+          exec:
+            command: [nc, -z, 127.0.0.1, '4822']
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          exec:
+            command: [nc, -z, 127.0.0.1, '4822']
+          periodSeconds: 30
+          timeoutSeconds: 3
+          failureThreshold: 5
+        volumeMounts:
         - name: tailscale-dns
           mountPath: /etc/resolv.conf
           subPath: resolv.conf
@@ -177,7 +225,7 @@ spec:
           mountPath: /config
           readOnly: true
         # LocalAPI is privileged to this identity; only this helper receives it.
-        # No machine-state PVC or LocalAPI socket is mounted into the web app.
+        # No machine-state PVC or LocalAPI socket is mounted into http or guacd.
         - name: tailscale-socket
           mountPath: /var/run/tailscale
           readOnly: true
