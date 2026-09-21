@@ -27,7 +27,7 @@ spec:
           value: '0'
       containers:
       - name: http
-        image: ghcr.io/lukegus/termix:release-2.7.1@sha256:931e4ce466f4d29b157eb8d6dcd4d36ee5114495c6edddbb19d4e360e2a60f8d
+        image: ghcr.io/lukegus/termix:release-2.8.0@sha256:25e8a0eb39f45c9ac5e8e7615fd84a0380018ea012317bc665b86458d900b4b9
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsNonRoot: true
@@ -79,6 +79,16 @@ spec:
           value: 127.0.0.1
         - name: GUACD_PORT
           value: '4822'
+        # Compose advertises the "termix" service name; same-pod guacd is loopback.
+        # resolveJumpTunnelEndpoint also forces 127.0.0.1 when GUACD_HOST is loopback.
+        - name: GUACD_TUNNEL_HOST
+          value: 127.0.0.1
+        # Paths as guacd sees them on the shared PVC (mounted at /termix-data).
+        # The backend still reads recordings from DATA_DIR (/app/data/...).
+        - name: GUACD_RECORDING_PATH
+          value: /termix-data/session_recordings/guacamole
+        - name: GUACD_DRIVE_PATH
+          value: /termix-data/rdp-drive
         - name: ENABLE_TELEMETRY
           value: 'false'
         - name: ENABLE_SSL
@@ -158,6 +168,9 @@ spec:
           mountPath: /etc/resolv.conf
           subPath: resolv.conf
           readOnly: true
+        # Shared with http's /app/data: RDP drive redirection and session recordings.
+        - name: data
+          mountPath: /termix-data
       - name: tailscale
         image: tailscale/tailscale:v1.102.3@sha256:8c42c4574ab066384fcb72f69e086a2ff1dd3652eb6f56856cee34bcf0d2f680
         imagePullPolicy: IfNotPresent
@@ -194,7 +207,7 @@ spec:
           mountPath: /var/run/tailscale
       - name: tailscale-dns
         # Reuse the existing pinned image's Node runtime; no package installs.
-        image: ghcr.io/lukegus/termix:release-2.7.1@sha256:931e4ce466f4d29b157eb8d6dcd4d36ee5114495c6edddbb19d4e360e2a60f8d
+        image: ghcr.io/lukegus/termix:release-2.8.0@sha256:25e8a0eb39f45c9ac5e8e7615fd84a0380018ea012317bc665b86458d900b4b9
         imagePullPolicy: IfNotPresent
         command: [/usr/local/bin/node, /config/dns-forwarder.cjs]
         securityContext:
