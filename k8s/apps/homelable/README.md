@@ -1,4 +1,4 @@
-# Homelable 3.4.2
+# Homelable 3.5.0
 
 ## Retained service status
 
@@ -32,7 +32,7 @@ kubectl -n homelable get secret homelable-auth -o jsonpath='{.data.BOOTSTRAP_PAS
 
 The command deliberately reveals the login: do not paste its output into chat/logs.
 Do not rotate SECRET_KEY casually; treat it as persistent application key material.
-MCP is not deployed and MCP service auth is explicitly empty/disabled. Live view and
+MCP is enabled as an authenticated loopback-connected sidecar (see below). Live view and
 Homepage unauthenticated API keys are disabled. Scanner ranges are empty, HTTP
 probes/service checks and scheduled Proxmox/MQTT sync are off. Default-deny **egress**
 allows only the existing Traefik HTTPS endpoint for manual Proxmox inventory import.
@@ -86,7 +86,7 @@ All containers run as UID/GID 1000 with RuntimeDefault seccomp.
   API equivalent: `POST /api/v1/proxmox/test-connection`, then
   `POST /api/v1/proxmox/import-pending` with host/port/verify_tls only; poll the
   returned run using `/api/v1/scan/runs/{id}`. Read inventory before importing.
-- Scheduled sync remains disabled. MCP, scans, probes and service checks remain off.
+- Scheduled sync remains disabled. Scans, probes and service checks remain off.
 - Pod-local `hostAliases` maps only the TLS hostname to the existing Traefik
   ClusterIP `10.43.213.255`; no DNS exceptions or global DNS edits are required.
   If that Service is recreated with a new IP, update the alias through GitOps.
@@ -98,13 +98,50 @@ All containers run as UID/GID 1000 with RuntimeDefault seccomp.
   the existing app credentials. Rollback by reverting the manifests and revoking
   only `homelable@pve!inventory`; do not delete inventory/PVC or other PVE users.
 
+## MCP endpoint (3.5.0)
+
+- URL: `https://homelable.homelab.krymancer.dev/mcp/` (Streamable HTTP).
+- Uses the same TLS Ingress and LAN/Tailscale source allowlist as the UI. No
+  public DNS/tunnel, NodePort, or separate externally exposed backend/MCP port.
+- nginx forwards `/mcp/` over loopback to port 8001, with buffering disabled for SSE.
+  The sidecar uses `BACKEND_URL=http://127.0.0.1:8000`; no additional egress is needed.
+- Out-of-band Secret `homelable-mcp` must contain two distinct random values:
+  `MCP_API_KEY` (client-facing) and `MCP_SERVICE_KEY` (sidecar/backend only).
+  Create it via stdin with `kubectl create -f -`, not secret-bearing CLI arguments.
+  Preserve existing keys on reruns. Never commit values or last-applied annotations.
+- Clients send `X-API-Key` containing `MCP_API_KEY`. Retrieve only in a private terminal:
+
+  ```sh
+  kubectl -n homelable get secret homelable-mcp -o jsonpath='{.data.MCP_API_KEY}' | base64 -d
+  ```
+
+- This key grants upstream MCP read AND write tools, including topology changes
+  and document edits. It is not a read-only integration. Treat imported document
+  content as data, not agent instructions. Do not give untrusted agents this key.
+- No agent client is automatically registered by deploying the endpoint.
+- Public documentation sharing (`DOCS_VIEW_KEY`) and UniFi scheduled sync remain
+  explicitly disabled; existing Proxmox settings and outbound restrictions remain.
+- Verification: missing/wrong API key must return 401; authenticated initialize,
+  tools/list, list_documentation and read_document must succeed through HTTPS.
+  Check original canvas/inventory/document counts and SQLite integrity after upgrade.
+- Backup: use SQLite's online backup API for a consistent database, archive the
+  complete data directory (including uploads), and back up application, Proxmox,
+  and MCP Secrets to a private off-pod directory before upgrading. Verify the copy
+  with `PRAGMA integrity_check`. No automated backup schedule is implied.
+- Rollback: revert the upgrade commit through GitOps. If a schema rollback is
+  needed, coordinate stopping writes/reconciliation and restore the matching
+  pre-upgrade SQLite backup, uploads and Secrets before starting the old image;
+  never blindly downgrade against a migrated database or delete the PVC.
+
 ## Verified upstream images
 
-- `ghcr.io/pouzor/homelable-backend:3.4.2@sha256:b6d122e9879a3ade4680a21d0cae485f2382c3e9eecdf8ae1aa8a0a59642f6f0`
-- `ghcr.io/pouzor/homelable-frontend:3.4.2@sha256:d9115568828e4b72a1960d64936fa92bedd2d9a00ff133b8efc98c7cc0fb0c9d`
+- `ghcr.io/pouzor/homelable-mcp:3.5.0@sha256:811dcf1e463c1945c697fbb358c6489ab496ffc00c36f48a1e63e77df3cca5be`
+
+- `ghcr.io/pouzor/homelable-backend:3.5.0@sha256:64452d231e3227af54ea4e126850cdd6a89b2b169d22bd345e212986ba7621df`
+- `ghcr.io/pouzor/homelable-frontend:3.5.0@sha256:c5adb1ce2781345140d2c85d3120ae92cb35c0958cf9664cd2a7207089fb4327`
 
 ## Sources (stable release + registry verified)
 
-- https://github.com/Pouzor/homelable/releases/tag/v3.4.2
-- https://github.com/Pouzor/homelable/blob/v3.4.2/docker-compose.prebuilt.yml
-- https://github.com/Pouzor/homelable/blob/v3.4.2/backend/app/core/config.py
+- https://github.com/Pouzor/homelable/releases/tag/v3.5.0
+- https://github.com/Pouzor/homelable/blob/v3.5.0/docker-compose.prebuilt.yml
+- https://github.com/Pouzor/homelable/blob/v3.5.0/backend/app/core/config.py

@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: backend
-        image: ghcr.io/pouzor/homelable-backend:3.4.2@sha256:b6d122e9879a3ade4680a21d0cae485f2382c3e9eecdf8ae1aa8a0a59642f6f0
+        image: ghcr.io/pouzor/homelable-backend:3.5.0@sha256:64452d231e3227af54ea4e126850cdd6a89b2b169d22bd345e212986ba7621df
         imagePullPolicy: IfNotPresent
         securityContext: &id001
           runAsNonRoot: true
@@ -84,7 +84,14 @@ spec:
         - name: SERVICE_CHECK_ENABLED
           value: 'false'
         - name: MCP_SERVICE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homelable-mcp
+              key: MCP_SERVICE_KEY
+        - name: DOCS_VIEW_KEY
           value: ''
+        - name: UNIFI_SYNC_ENABLED
+          value: 'false'
         - name: LIVEVIEW_KEY
           value: ''
         - name: HOMEPAGE_API_KEY
@@ -129,8 +136,54 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /app/data
+      - name: mcp
+        image: ghcr.io/pouzor/homelable-mcp:3.5.0@sha256:811dcf1e463c1945c697fbb358c6489ab496ffc00c36f48a1e63e77df3cca5be
+        imagePullPolicy: IfNotPresent
+        securityContext: *id001
+        ports:
+        - name: mcp
+          containerPort: 8001
+        env:
+        - name: BACKEND_URL
+          value: http://127.0.0.1:8000
+        - name: MCP_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homelable-mcp
+              key: MCP_API_KEY
+        - name: MCP_SERVICE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homelable-mcp
+              key: MCP_SERVICE_KEY
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 5
       - name: frontend
-        image: ghcr.io/pouzor/homelable-frontend:3.4.2@sha256:d9115568828e4b72a1960d64936fa92bedd2d9a00ff133b8efc98c7cc0fb0c9d
+        image: ghcr.io/pouzor/homelable-frontend:3.5.0@sha256:c5adb1ce2781345140d2c85d3120ae92cb35c0958cf9664cd2a7207089fb4327
         imagePullPolicy: IfNotPresent
         securityContext: *id001
         ports:
