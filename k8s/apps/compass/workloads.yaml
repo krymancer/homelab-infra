@@ -112,8 +112,6 @@ spec:
           value: /codex
         - name: NAS_ROOT
           value: /data/compass-local
-        - name: WORKER_CONCURRENCY
-          value: '2'
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
@@ -154,7 +152,7 @@ spec:
             cpu: 100m
             memory: 256Mi
           limits:
-            memory: 1Gi
+            memory: 2Gi
         command:
         - sh
         - -c
@@ -220,6 +218,6 @@ data:
   safe-init.ts: "import { runMigrations } from \"/app/packages/db/src/migrate\";\n\
     import { createDb, settings } from \"/app/packages/db/src/index\";\nawait runMigrations(process.env.DATABASE_URL!);\n\
     const db = createDb(process.env.DATABASE_URL!);\nfor (const [section,value] of\
-    \ Object.entries({pipeline:{autoTailor:false,autoPublish:false,autoIngestDiscovered:false},email:{enabled:false,autoApply:false},sweeps:{cron:\"\
+    \ Object.entries({pipeline:{autoTailor:false,autoPublish:false,autoIngestDiscovered:false,workerConcurrency:1},email:{enabled:false,autoApply:false},sweeps:{cron:\"\
     \"},llmShim:{enabled:false}})) {\n await db.insert(settings).values({section,value}).onConflictDoNothing();\n\
     }\nprocess.exit(0);\n"
