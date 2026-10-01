@@ -1,0 +1,21 @@
+# Copied onto the config PVC only when configuration.yaml is absent.
+# Home Assistant 2026.9 rejects any request that carries X-Forwarded-For
+# unless the HTTP integration trusts the proxy. Traefik always sends that
+# header, so the Ingress returns 400 until this file exists.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: home-assistant-seed
+  namespace: home-assistant
+data:
+  configuration.yaml: |
+    # Seeded once. Later edits belong on the PVC, not in this ConfigMap.
+    default_config:
+
+    http:
+      use_x_forwarded_for: true
+      trusted_proxies:
+        # k3s default pod CIDR. Traefik connects from a pod in this range.
+        - 10.42.0.0/16
+        - 127.0.0.1
+        - ::1

@@ -126,6 +126,11 @@ data:
             icon: ollama
             siteMonitor: http://ollama.open-webui.svc.cluster.local:11434
     - Apps:
+        - Home Assistant:
+            href: https://ha.homelab.krymancer.dev
+            description: Home automation
+            icon: home-assistant
+            siteMonitor: http://home-assistant.home-assistant.svc.cluster.local:8123
         - Compass:
             href: https://compass.homelab.krymancer.dev
             description: Job pipeline (automation disabled)

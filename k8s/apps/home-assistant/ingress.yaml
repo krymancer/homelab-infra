@@ -1,0 +1,40 @@
+# Defense in depth only: keep DNS private and do not publish a tunnel/port forward.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: lan-only
+  namespace: home-assistant
+spec:
+  ipAllowList:
+    sourceRange:
+      - 192.168.0.0/24
+      - 100.64.0.0/10
+      # Tailscale subnet-router SNAT uses its dynamic k3s pod address.
+      - 10.42.0.0/24
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: home-assistant-lan-only@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - ha.homelab.krymancer.dev
+      secretName: homelab-wildcard-tls
+  rules:
+    - host: ha.homelab.krymancer.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: home-assistant
+                port:
+                  name: http
