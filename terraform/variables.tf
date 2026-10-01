@@ -67,7 +67,7 @@ variable "k3s_vm" {
 }
 
 variable "k3s_alt_vm" {
-  description = "Staging k3s VM on alt. Cutover later may move services from pve VM 200 and reassign 192.168.0.20."
+  description = "Staging k3s VM on alt. Cutover later may move services from pve VM 200 and reassign 192.168.0.20. Default IP 192.168.0.23 is currently Ollama CT 231; do not boot this VM on that address (see k8s/apps/open-webui/README.md)."
   type = object({
     vmid     = number
     name     = string

@@ -41,3 +41,5 @@ data:
     192.168.0.20 auth.homelab.krymancer.dev
     192.168.0.20 compass.homelab.krymancer.dev
     192.168.0.20 llm.homelab.krymancer.dev
+    192.168.0.20 webui.homelab.krymancer.dev
+    192.168.0.20 ollama.homelab.krymancer.dev

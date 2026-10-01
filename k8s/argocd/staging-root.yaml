@@ -1,5 +1,7 @@
-# Staging app-of-apps for alt VM 220 (192.168.0.23). Terraform applies an
-# equivalent Application after Helm installs Argo CD (see terraform/argocd.tf).
+# Staging app-of-apps for alt VM 220. Its default address 192.168.0.23 is
+# currently the live Ollama CT 231; do not boot this VM on that address
+# (k8s/apps/open-webui/README.md). Terraform applies an equivalent
+# Application after Helm installs Argo CD (see terraform/argocd.tf).
 #
 # Production continues to use k8s/argocd/root.yaml (no directory exclude).
 # Default exclude keeps Pi-hole (LoadBalancer 192.168.0.20) and cloudflared
