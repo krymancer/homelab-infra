@@ -1,10 +1,39 @@
+# Template for Secret cliproxyapi-config, key config.yaml (mounted at /config/config.yaml).
+# Do not commit the live Secret or any real management key / API key.
+#
+# After this manifest merges, the Infrastructure Engineer must edit the live Secret
+# so the flags below match, then restart:
+#   kubectl rollout restart deployment/cliproxyapi -n cliproxyapi
+# Argo CD does not manage that Secret. A rollout that happens before the Secret
+# change still serves 404 for /management.html.
+#
+# UI: https://llm.homelab.krymancer.dev/management.html
+# Reachable only through the LAN allow-list (192.168.0.0/24, Tailscale CGNAT,
+# Tailscale subnet-router pod net). Do not add this host to the Cloudflare Tunnel.
 host: ""
 port: 8317
 auth-dir: /auth
 remote-management:
-  allow-remote: false
+  # Required. Traefik's connection is not 127.0.0.1, so allow-remote: false
+  # makes /v0/management return 403 ("remote management disabled") and the
+  # panel cannot sign in. The Ingress allow-list is the network boundary.
+  allow-remote: true
+
+  # Required. An empty key disables every /v0/management route (404).
+  # Plaintext is bcrypt-hashed in memory at startup. The Secret mount is
+  # read-only, so the hashed write-back is ignored; keep the plaintext here
+  # in the live Secret only.
   secret-key: ""
-  disable-control-panel: true
+
+  # Required false (or omit; the default is false). true skips the panel
+  # route and GET /management.html returns 404.
+  disable-control-panel: false
+
+  # Keep true on v7.3.7. The binary's updater always fetches releases/latest,
+  # and Management Center v1.25.0+ calls /v8/management, which this server does
+  # not implement. The Deployment seeds v1.24.2 (the last /v0 panel) on a
+  # read-only volume. Flipping this to false does not change that file, but it
+  # will log failed update attempts.
   disable-auto-update-panel: true
 api-keys:
   - API_KEY_PLACEHOLDER
