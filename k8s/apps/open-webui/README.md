@@ -95,3 +95,10 @@ The CT itself (packages, GPU mounts, the pulled model) was created on alt
 outside this repo and is not re-applied by Terraform. Replacing it means
 losing the running GPU setup. The contract this repo owns is the Endpoint
 address, the two hostnames, and Open WebUI.
+
+## Default model / context
+
+- Ollama runs on Proxmox CT `ollama` (LAN `192.168.0.23:11434`), not in-cluster.
+- Preferred chat model: `qwen2.5-coder:14b-16k` (`PARAMETER num_ctx 16384`; ~11GB VRAM on RTX 2060 12GB).
+- Base tag `qwen2.5-coder:14b` keeps Ollama's default `num_ctx` 4096 — avoid it for long coding chats.
+- `DEFAULT_MODELS` in the Deployment seeds new chats; Admin → Settings → Models can also set defaults. Per-chat Advanced params can still override `num_ctx`.
