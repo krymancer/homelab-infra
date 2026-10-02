@@ -97,3 +97,33 @@ handling, certificate reflection and UI functionality remain post-sync checks.
 - https://github.com/actualbudget/actual/blob/v26.9.0/packages/sync-server/docker/alpine.Dockerfile
 - https://github.com/actualbudget/actual/blob/v26.9.0/packages/sync-server/src/app-account.js
 - https://github.com/actualbudget/actual/blob/v26.9.0/packages/sync-server/src/load-config.js
+
+## Bank sync automation (Pluggy.ai)
+
+Actual has **no native daily bank-sync schedule**. This app ships a CronJob
+`actual-bank-sync` that runs `@actual-app/api` `runBankSync()` daily at
+**06:00 America/Fortaleza** against the in-cluster Actual Service.
+
+### One-time Secret (required, not in Git)
+
+```bash
+# Budget Sync ID: Actual UI → Settings → Advanced → Sync ID
+# (for "My Finances" this is the group id, not the file id)
+#
+# Session token: long-lived token from Actual's server sessions table, or
+# replace with password-based seriouslag/actual-auto-sync later.
+
+kubectl -n actual create secret generic actual-auto-sync \
+  --from-literal=serverURL='http://actual.actual.svc.cluster.local:5006' \
+  --from-literal=sessionToken='***' \
+  --from-literal=budgetSyncId='***'
+```
+
+Manual one-shot:
+
+```bash
+kubectl -n actual create job --from=cronjob/actual-bank-sync actual-bank-sync-manual-$(date +%s)
+kubectl -n actual logs -f job/actual-bank-sync-manual-...
+```
+
+This is independent of AUVP/auvp-financas Pluggy sync.

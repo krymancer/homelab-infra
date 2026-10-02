@@ -6,3 +6,16 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+  - bank-sync-cronjob.yaml
+
+configMapGenerator:
+  - name: actual-bank-sync-script
+    namespace: actual
+    files:
+      - run-bank-sync.mjs
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        argocd.argoproj.io/sync-options: Prune=false
+      labels:
+        app: actual-bank-sync

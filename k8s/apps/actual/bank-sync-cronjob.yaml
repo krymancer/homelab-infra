@@ -1,0 +1,83 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: actual-bank-sync
+  namespace: actual
+  labels:
+    app: actual-bank-sync
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  schedule: "0 6 * * *"
+  timeZone: America/Fortaleza
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 600
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 604800
+      backoffLimit: 2
+      activeDeadlineSeconds: 1800
+      template:
+        metadata:
+          labels:
+            app: actual-bank-sync
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: sync
+              image: node:24-alpine
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              env:
+                - name: ACTUAL_SERVER_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: actual-auto-sync
+                      key: serverURL
+                - name: ACTUAL_SESSION_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: actual-auto-sync
+                      key: sessionToken
+                - name: ACTUAL_BUDGET_SYNC_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: actual-auto-sync
+                      key: budgetSyncId
+                - name: NODE_ENV
+                  value: production
+              command: ["node", "/scripts/run-bank-sync.mjs"]
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 256Mi
+                limits:
+                  cpu: "1"
+                  memory: 1Gi
+          volumes:
+            - name: scripts
+              configMap:
+                name: actual-bank-sync-script
+                defaultMode: 0555
+            - name: tmp
+              emptyDir:
+                sizeLimit: 2Gi
