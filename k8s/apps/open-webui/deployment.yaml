@@ -44,6 +44,10 @@ spec:
             # to ollama-service.open-webui.svc.cluster.local.
             - name: OLLAMA_BASE_URL
               value: http://ollama.open-webui.svc.cluster.local:11434
+            # Prefer raised-ctx custom tag (PARAMETER num_ctx 16384 on Ollama CT).
+            # Base qwen2.5-coder:14b still defaults to Ollama num_ctx 4096.
+            - name: DEFAULT_MODELS
+              value: qwen2.5-coder:14b-16k
             - name: WEBUI_URL
               value: https://webui.homelab.krymancer.dev
             - name: WEBUI_AUTH
