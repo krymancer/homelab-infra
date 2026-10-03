@@ -60,17 +60,19 @@ spec:
               memory: 512Mi
               cpu: 1000m
         - name: redis
-          image: redis:7-alpine
+          # 3.4.0 refuses to boot without HSETEX (Redis 8.0+). 7-alpine is 7.4.11.
+          image: redis:8.10.2-alpine
           args: ["--maxmemory", "96mb", "--maxmemory-policy", "allkeys-lru", "--save", ""]
           ports:
             - containerPort: 6379
               protocol: TCP
           resources:
             requests:
-              memory: 24Mi
+              memory: 64Mi
               cpu: 25m
             limits:
-              memory: 128Mi
+              # Official 8.x images load search/json/timeseries/bloom on top of maxmemory.
+              memory: 256Mi
               cpu: 250m
       volumes:
         - name: data
