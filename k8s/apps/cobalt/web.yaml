@@ -21,6 +21,15 @@ data:
       listen 8080;
       root /usr/share/nginx/html;
       index index.html;
+
+      # Cobalt 11 remuxes in the browser with libav.js. Threaded wasm needs
+      # SharedArrayBuffer, which the browser only exposes on a cross-origin
+      # isolated document. Upstream sets these on every response (vite dev
+      # server and the prerendered Cloudflare `_headers` file). nginx does
+      # not apply `_headers`, so they have to be sent here.
+      add_header Cross-Origin-Opener-Policy "same-origin" always;
+      add_header Cross-Origin-Embedder-Policy "require-corp" always;
+
       location / {
         try_files $uri $uri.html $uri/index.html /404.html;
       }
@@ -44,6 +53,10 @@ spec:
     metadata:
       labels:
         app: cobalt-web
+      annotations:
+        # nginx does not reload when the ConfigMap volume updates. Changing
+        # this rolls cobalt-web so a synced config is the one actually served.
+        homelab.krymancer.dev/nginx-config: coop-coep
     spec:
       containers:
         - name: nginx
