@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: speedtest-exporter
-          image: ghcr.io/ishioni/speedtest-exporter:0.2.5
+          image: ghcr.io/ishioni/speedtest-exporter:0.2.6
           env:
             - name: SPEEDTEST_PORT
               value: "9798"

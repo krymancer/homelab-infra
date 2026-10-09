@@ -1,6 +1,6 @@
 # hledger-web
 
-Plain-text accounting UI ([hledger-web](https://hledger.org/hledger-web.html)). Image: `dastapov/hledger:1.52.3` (the Docker image [hledger.org recommends](https://hledger.org/install.html)). Stock **light** UI — the app has no built-in dark mode.
+Plain-text accounting UI ([hledger-web](https://hledger.org/hledger-web.html)). Image: `dastapov/hledger:1.52.4` (the Docker image [hledger.org recommends](https://hledger.org/install.html)). Stock **light** UI — the app has no built-in dark mode.
 
 Public at **https://hledger.homelab.krymancer.dev** (Cloudflare, same as other `*.homelab` apps). `hledger-web` has no password or Basic Auth; `--allow` only limits what a visitor can do (`view` / `add` / `edit`). This instance uses `add` (view + append transactions). Put Traefik basic-auth middleware in front later if you want a login prompt.
 

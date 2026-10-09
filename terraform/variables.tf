@@ -115,7 +115,7 @@ variable "k3s_alt_bootstrap_argocd" {
 variable "argocd_chart_version" {
   description = "argo-cd Helm chart version from https://argoproj.github.io/argo-helm"
   type        = string
-  default     = "10.8.3"
+  default     = "10.10.1"
 }
 
 variable "argocd_repo_url" {

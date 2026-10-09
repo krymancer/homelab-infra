@@ -57,5 +57,5 @@ curl --fail --show-error https://ha.homelab.krymancer.dev/
 Open https://ha.homelab.krymancer.dev and create the owner account. Config and
 the recorder database live on `home-assistant-config` (5Gi, `local-path`, not
 pruned by Argo). That PVC is node-local. Back it up before an image upgrade
-if you need to restore the instance. The image is pinned to `2026.9.4`, the
+if you need to restore the instance. The image is pinned to `2026.10.0`, the
 same digest as the `stable` tag at the time it was added.

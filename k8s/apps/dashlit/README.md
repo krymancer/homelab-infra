@@ -14,8 +14,8 @@ Persistence is not a backup. This promotion adds no backup schedule, independent
 backup destination, restore test, HA or production-readiness guarantee. Retain
 application data and its matching credentials/encryption material together.
 
-Stable release **v1.1.1**, not the moving main/dev tag:
-`ghcr.io/codewec/dashlit:v1.1.1@sha256:41b33c90d8ee8cd7ba469b181fb5ffb8cc2e4a2c35755ef1abb8fd6fe386500c`.
+Stable release **v1.1.3**, not the moving main/dev tag:
+`ghcr.io/codewec/dashlit:v1.1.3@sha256:d30eff92e789d8e95f14fcfd642589dc84486d35167310a19b658d72187ea830`.
 Non-root UID/GID 10001, port 8080; upstream `/api/auth/config` probes.
 Requests: 25m CPU / 32Mi; limits: 500m / 192Mi; Go soft limit: 128MiB.
 PVC: `dashlit-data`, 1Gi. Standalone, **not a replacement for Homepage**.
@@ -29,7 +29,7 @@ exact nonempty keys were verified without displaying values:
 - `JWT_SECRET` (keep stable; changing it invalidates sessions)
 - `INITIAL_ADMIN_PASSWORD` (one-time bootstrap password)
 
-Username is `admin`. v1.1.1 supports `INITIAL_ADMIN_USERNAME` and
+Username is `admin`. v1.1.3 supports `INITIAL_ADMIN_USERNAME` and
 `INITIAL_ADMIN_PASSWORD`: it creates the administrator before serving requests
 only if the database has no users. Both password and OIDC registration are
 **disabled from the first start**. Password login remains enabled and OIDC is
@@ -109,8 +109,8 @@ handling, certificate reflection and UI functionality remain post-sync checks.
 
 ## Upstream evidence
 
-- https://github.com/codewec/dashlit/releases/tag/v1.1.1
-- https://github.com/codewec/dashlit/blob/v1.1.1/README.md
-- https://github.com/codewec/dashlit/blob/v1.1.1/Dockerfile
-- https://github.com/codewec/dashlit/blob/v1.1.1/backend/internal/auth/auth.go
-- https://github.com/codewec/dashlit/blob/v1.1.1/backend/internal/handlers/auth.go
+- https://github.com/codewec/dashlit/releases/tag/v1.1.3
+- https://github.com/codewec/dashlit/blob/v1.1.3/README.md
+- https://github.com/codewec/dashlit/blob/v1.1.3/Dockerfile
+- https://github.com/codewec/dashlit/blob/v1.1.3/backend/internal/auth/auth.go
+- https://github.com/codewec/dashlit/blob/v1.1.3/backend/internal/handlers/auth.go

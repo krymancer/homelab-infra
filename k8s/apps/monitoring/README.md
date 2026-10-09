@@ -44,7 +44,7 @@ collection to decline; do not delete history or impose a low memory limit to
 force an immediate reduction. Verify target health, dashboard expressions and
 Warden's read-only collector after changing these settings.
 
-kube-prometheus-stack is a **one-shot Helm release** named `kube-prom` in namespace `monitoring` (chart **83.4.2**). It is **not** an Argo Application: wrapping that release would fight the existing Helm secret, PVCs, and operator-owned CRs.
+kube-prometheus-stack is a **one-shot Helm release** named `kube-prom` in namespace `monitoring` (chart **83.7.0**). It is **not** an Argo Application: wrapping that release would fight the existing Helm secret, PVCs, and operator-owned CRs.
 
 GitOps covers **extras only** (exporters, Probe/ServiceMonitor CRs, dashboard ConfigMaps) via Application `monitoring` → `k8s/apps/monitoring/extras`. Helm values for the stack live here as `values.yaml` and are applied with `helm upgrade`.
 
@@ -66,7 +66,7 @@ Uptime Kuma and Pi-hole are untouched.
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 helm upgrade kube-prom prometheus-community/kube-prometheus-stack \
-  --namespace monitoring --version 83.4.2 \
+  --namespace monitoring --version 83.7.0 \
   -f k8s/apps/monitoring/values.yaml
 ```
 
@@ -126,8 +126,8 @@ Allow **9100/tcp** from the k3s VM (`192.168.0.20`) if the PVE firewall is on. O
 | `blackbox-exporter` | HTTP + DNS modules. **No ICMP** (would need `CAP_NET_RAW`; skipped). |
 | Probe `blackbox-http` | job `blackbox_http` → `https://1.1.1.1`, `https://google.com` |
 | Probe `blackbox-dns-*` | jobs `blackbox_dns_google` / `blackbox_dns_cloudflare` → A lookup via `1.1.1.1` |
-| `speedtest-exporter` | `ghcr.io/ishioni/speedtest-exporter:0.2.5` (Ookla CLI). Cache **45m**, ServiceMonitor interval **45m**, timeout **120s**. Metric names match the Internet dashboard. |
-| `pve-exporter` | `prompve/prometheus-pve-exporter:3.10.0` against `https://192.168.0.11:8006` |
+| `speedtest-exporter` | `ghcr.io/ishioni/speedtest-exporter:0.2.6` (Ookla CLI). Cache **45m**, ServiceMonitor interval **45m**, timeout **120s**. Metric names match the Internet dashboard. |
+| `pve-exporter` | `prompve/prometheus-pve-exporter:3.10.1` against `https://192.168.0.11:8006` |
 
 ## Dashboards (ConfigMaps `grafana_dashboard=1`, folder Homelab)
 

@@ -16,11 +16,11 @@ application data and its matching credentials/encryption material together.
 
 ## Pinned, minimal deployment
 
-- Release **v5.3.0**, published 2026-09-06; verified against GitHub's latest stable release on 2026-09-16.
-- App: `ghcr.io/amruthpillai/reactive-resume:v5.3.0`, pinned by OCI index digest in `deployment.yaml`.
+- Release **v5.3.2**, published 2026-09-26. v6.0.1 is the newest GitHub release and is not deployed (breaking self-host upgrade).
+- App: `ghcr.io/reactive-resume/reactive-resume:v5.3.2`, pinned by OCI index digest in `deployment.yaml`. The v5.3.2 image is published on the `reactive-resume` GHCR org; `amruthpillai/reactive-resume` stops at v5.3.0.
 - Database: independent `postgres:16.15-bookworm`, pinned by OCI index digest in `postgres.yaml`.
 - Two containers only: app + PostgreSQL. **No Browserless/Chromium, Redis, S3/MinIO/SeaweedFS**.
-  The *released v5.3.0 documentation*, not main, explicitly says browser-side PDF generation replaced Browserless in v5.1.0.
+  The *released v5.3.2 documentation*, not main, explicitly says browser-side PDF generation replaced Browserless in v5.1.0.
   Redis/S3 are optional for core resume creation; the AI Agent workspace is intentionally unavailable in this minimal deployment.
 - Local uploads: `resume-data` 5Gi at `/app/data`; database: `postgres-data` 10Gi.
 - All PVCs use `local-path` with `Prune=false,Delete=false` for ArgoCD. Local-path is node-local and NOT a backup;
@@ -58,7 +58,7 @@ Read it only in a private local editor/password manager; do not paste it into ch
 ## Saved AI-provider credential encryption
 
 The app also requires the out-of-band Secret `reactive-resume-ai-encryption`, key
-`ENCRYPTION_SECRET`, before its Deployment can start. v5.3.0 requires at least
+`ENCRYPTION_SECRET`, before its Deployment can start. v5.3.2 requires at least
 32 characters; use a dedicated cryptographically random 32-byte hex value (64 characters).
 Do not reuse or rotate `AUTH_SECRET` or database credentials to satisfy this requirement.
 The deployment references the Secret through `secretKeyRef`; no key belongs in Git.
@@ -120,9 +120,9 @@ with byte-for-byte in-memory Secret read-back checks. Only namespaces and Secret
 PVC binding, pod startup, ingress TLS and UI/PDF workflows remain rollout acceptance checks.
 
 Official version-specific sources:
-- https://github.com/reactive-resume/reactive-resume/releases/tag/v5.3.0
-- https://github.com/reactive-resume/reactive-resume/blob/v5.3.0/docs/self-hosting/docker.mdx
-- https://github.com/reactive-resume/reactive-resume/blob/v5.3.0/.env.example
-- https://github.com/reactive-resume/reactive-resume/blob/v5.3.0/Dockerfile
-- https://github.com/reactive-resume/reactive-resume/blob/v5.3.0/packages/auth/src/config.ts
+- https://github.com/reactive-resume/reactive-resume/releases/tag/v5.3.2
+- https://github.com/reactive-resume/reactive-resume/blob/v5.3.2/docs/self-hosting/docker.mdx
+- https://github.com/reactive-resume/reactive-resume/blob/v5.3.2/.env.example
+- https://github.com/reactive-resume/reactive-resume/blob/v5.3.2/Dockerfile
+- https://github.com/reactive-resume/reactive-resume/blob/v5.3.2/packages/auth/src/config.ts
 - https://github.com/docker-library/official-images/blob/master/library/postgres (16.15-bookworm tag verified 2026-09-16)
