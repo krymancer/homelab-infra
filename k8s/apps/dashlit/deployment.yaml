@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: dashlit
-          image: ghcr.io/codewec/dashlit:v1.1.1@sha256:41b33c90d8ee8cd7ba469b181fb5ffb8cc2e4a2c35755ef1abb8fd6fe386500c
+          image: ghcr.io/codewec/dashlit:v1.1.3@sha256:d30eff92e789d8e95f14fcfd642589dc84486d35167310a19b658d72187ea830
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

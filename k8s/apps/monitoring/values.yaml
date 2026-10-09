@@ -1,5 +1,5 @@
 # kube-prometheus-stack values for the existing one-shot Helm release
-# `kube-prom` (chart kube-prometheus-stack-83.4.2) in namespace `monitoring`.
+# `kube-prom` (chart kube-prometheus-stack-83.7.0) in namespace `monitoring`.
 #
 # This file is NOT Argo-synced. Putting the Helm release under Argo would
 # fight the live `kube-prom` install (release secret, PVC names, CR ownership).
@@ -14,7 +14,7 @@
 #   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 #   helm repo update
 #   helm upgrade kube-prom prometheus-community/kube-prometheus-stack \
-#     --namespace monitoring --version 83.4.2 \
+#     --namespace monitoring --version 83.7.0 \
 #     -f k8s/apps/monitoring/values.yaml
 
 grafana:

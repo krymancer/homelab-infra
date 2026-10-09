@@ -1,4 +1,4 @@
-# Termix 2.8.0
+# Termix 2.9.2
 
 ## Retained service status
 
@@ -14,8 +14,8 @@ Persistence is not a backup. This promotion adds no backup schedule, independent
 backup destination, restore test, HA or production-readiness guarantee. Retain
 application data and its matching credentials/encryption material together.
 
-Image uses `ghcr.io/lukegus/termix:release-2.8.0`, the publishing path verified in the
-**Termix-SSH/Termix** release workflow (the Helm repository default differs; `:2.8.0` publishes the same index).
+Image uses `ghcr.io/lukegus/termix:release-2.9.2`, the publishing path verified in the
+**Termix-SSH/Termix** release workflow (the Helm repository default differs; `:2.9.2` publishes the same index).
 SQLite/state on a 2Gi local-path PVC; requests 192Mi / limit 512Mi. Only the web
 port 8080 is exposed by ClusterIP/Ingress; internal backend ports (including
 loopback-only guacd 4822) stay unexposed.
@@ -28,7 +28,7 @@ The userspace Tailscale sidecar owns a separate persisted identity on
 with no proxy authentication (same-pod loopback), for tailnet SSH connections.
 Do not expose this proxy through a Service.
 
-Termix 2.8.0 resolves hostnames before opening SOCKS. A custom loopback-only DNS
+Termix resolves hostnames before opening SOCKS. A custom loopback-only DNS
 helper forwards the tailnet zone through Tailscale LocalAPI, and other names to
 Cluster DNS. The web container and guacd receive the custom resolv.conf; the helper
 and Tailscale retain ClusterFirst resolution, avoiding bootstrap loops. The helper
@@ -109,16 +109,16 @@ All containers run as UID/GID 1000 with RuntimeDefault seccomp.
 
 ## Verified upstream images
 
-- `ghcr.io/lukegus/termix:release-2.8.0@sha256:25e8a0eb39f45c9ac5e8e7615fd84a0380018ea012317bc665b86458d900b4b9`
+- `ghcr.io/lukegus/termix:release-2.9.2@sha256:d64c841a560c54aa7c27b0e6bbd2fbf8b51073565040d2a6bfbc127f0a72cf1e`
 - `guacamole/guacd:1.6.0@sha256:8974eaa9ba32f713daf311e7cc8cd7e4cdfba1edea39eed75524e78ef4b08f4f`
 
 ## Sources (stable release + registry verified)
 
-- https://github.com/Termix-SSH/Termix/releases/tag/release-2.8.0-tag
-- https://github.com/Termix-SSH/Termix/blob/release-2.8.0-tag/docker/docker-compose.yml
-- https://github.com/Termix-SSH/Termix/blob/release-2.8.0-tag/src/backend/starter.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.8.0-tag/src/backend/utils/system-crypto.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.8.0-tag/src/backend/utils/guacd-config.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.8.0-tag/src/backend/hosts/guacamole/jump-tunnel-endpoint.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.8.0-tag/src/backend/hosts/guacamole/drive-settings.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.8.0-tag/src/backend/hosts/collab/runtime-store.ts
+- https://github.com/Termix-SSH/Termix/releases/tag/release-2.9.2-tag
+- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/docker/docker-compose.yml
+- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/starter.ts
+- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/utils/system-crypto.ts
+- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/utils/guacd-config.ts
+- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/hosts/guacamole/jump-tunnel-endpoint.ts
+- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/hosts/guacamole/drive-settings.ts
+- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/hosts/collab/runtime-store.ts

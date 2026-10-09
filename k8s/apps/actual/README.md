@@ -14,8 +14,8 @@ Persistence is not a backup. This promotion adds no backup schedule, independent
 backup destination, restore test, HA or production-readiness guarantee. Retain
 application data and its matching credentials/encryption material together.
 
-Stable release checked against upstream releases and **v26.9.0** source:
-`ghcr.io/actualbudget/actual:26.9.0-alpine@sha256:1c14eef351234f4b5dd0433865b5de89d70bdbdc57368d5b07e910662c6498f9`.
+Stable release checked against upstream releases and **v26.10.0** source:
+`ghcr.io/actualbudget/actual:26.10.0-alpine@sha256:67b1b5e9584e3e143b4f5c41e52b4506ed9cdd1072392d5ab5369f2d4fd0bffd`.
 Alpine variant, non-root UID/GID 1001, port 5006; upstream `/health` probes.
 Requests: 25m CPU / 128Mi; limits: 500m / 512Mi. PVC: `actual-data`, 2Gi.
 
@@ -91,12 +91,12 @@ handling, certificate reflection and UI functionality remain post-sync checks.
 
 ## Upstream evidence
 
-- https://github.com/actualbudget/actual/releases/tag/v26.9.0
+- https://github.com/actualbudget/actual/releases/tag/v26.10.0
 - https://actualbudget.org/docs/install/docker/
 - https://actualbudget.org/docs/config/
-- https://github.com/actualbudget/actual/blob/v26.9.0/packages/sync-server/docker/alpine.Dockerfile
-- https://github.com/actualbudget/actual/blob/v26.9.0/packages/sync-server/src/app-account.js
-- https://github.com/actualbudget/actual/blob/v26.9.0/packages/sync-server/src/load-config.js
+- https://github.com/actualbudget/actual/blob/v26.10.0/packages/sync-server/docker/alpine.Dockerfile
+- https://github.com/actualbudget/actual/blob/v26.10.0/packages/sync-server/src/app-account.js
+- https://github.com/actualbudget/actual/blob/v26.10.0/packages/sync-server/src/load-config.js
 
 ## Bank sync automation (Pluggy.ai)
 
