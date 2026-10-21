@@ -70,3 +70,50 @@ test('never write an investment valuation into a spending account', async () => 
   await assert.rejects(setValuation(api, { accountId: 'checking', key: 'test', total: 100, date: '2026-10-21', notes: '' }), /off-budget/);
   assert.equal(api.writes(), 0);
 });
+
+test('credit remainder falls when a pending purchase becomes a booked expense, without counting debt twice', async () => {
+  const api = budget();
+  const byAccount = { portfolio: [], remainder: [] };
+  let booked = -50000;
+  api.getAccounts = async () => [{ id: 'portfolio', offbudget: true }, { id: 'remainder', offbudget: true }, { id: 'card', offbudget: false }];
+  api.getTransactions = async id => byAccount[id];
+  api.addTransactions = async (id, rows) => byAccount[id].push(...rows);
+  api.updateTransaction = async (id, fields) => Object.assign(Object.values(byAccount).flat().find(t => t.id === id), fields);
+  api.getAccountBalance = async id => id === 'card' ? booked : byAccount[id].reduce((s, t) => s + t.amount, 0);
+  const s = { ...snapshot(100000), creditDebt: 130000, source: { ...snapshot(0).source, creditRemainder: { ledgerAccountId: 'card', accountId: 'remainder' } } };
+  await syncValuations(api, [s]);
+  assert.equal(await api.getAccountBalance('remainder'), -80000);
+  assert.equal(booked + await api.getAccountBalance('remainder'), -130000);
+  const count = byAccount.remainder.length;
+  await syncValuations(api, [s]);
+  assert.equal(byAccount.remainder.length, count);
+  booked -= 10000;
+  await syncValuations(api, [s]);
+  assert.equal(await api.getAccountBalance('remainder'), -70000);
+  assert.equal(booked + await api.getAccountBalance('remainder'), -130000);
+  booked = -140000;
+  const portfolioBefore = JSON.stringify(byAccount.portfolio);
+  await assert.rejects(syncValuations(api, [s]), /exceeds provider/);
+  assert.equal(JSON.stringify(byAccount.portfolio), portfolioBefore);
+});
+
+test('credit remainder cannot reuse the investment target or consume a closed/off-budget ledger', async () => {
+  const api = budget();
+  const s = { ...snapshot(1000), creditDebt: 100, source: { ...snapshot(0).source, creditRemainder: { ledgerAccountId: 'checking', accountId: 'portfolio' } } };
+  await assert.rejects(syncValuations(api, [s]), /duplicate/);
+  assert.equal(api.writes(), 0);
+});
+
+test('credit provider must be the configured item, a BRL card, and a finite nonnegative debt', async () => {
+  const source = { key: 'test', itemId: 'item', accountName: 'Portfolio', creditRemainder: { providerAccountId: 'card' } };
+  const args = { clientId: 'test', clientSecret: 'test', sources: [source], now };
+  for (const overrides of [{ itemId: 'wrong' }, { currencyCode: 'USD' }, { balance: -1 }, { balance: null }, { type: 'BANK' }]) {
+    const fetchImpl = async url => ({ ok: true, json: async () => {
+      if (url.endsWith('/auth')) return { apiKey: 'test' };
+      if (url.includes('/items/')) return { status: 'UPDATED', executionStatus: 'SUCCESS', lastUpdatedAt: now.toISOString() };
+      if (url.includes('/investments?')) return { total: 1, totalPages: 1, results: [holding('a', 100)] };
+      return { itemId: 'item', type: 'CREDIT', subtype: 'CREDIT_CARD', currencyCode: 'BRL', balance: 10, ...overrides };
+    } });
+    await assert.rejects(fetchSnapshots({ ...args, fetchImpl }), /credit liability/);
+  }
+});

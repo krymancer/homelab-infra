@@ -75,7 +75,14 @@ export async function fetchSnapshots({ clientId, clientSecret, sources, now = ne
       if (account.itemId !== source.itemId || account.type !== 'BANK' || account.currencyCode !== 'BRL' || !Number.isFinite(account.balance)) throw new Error('Unexpected brokerage cash account');
       cash = Math.round(account.balance * 100);
     }
-    snapshots.push({ source, ...summary, date, cash, refreshedAt: item.lastUpdatedAt });
+    let creditDebt;
+    if (source.creditRemainder) {
+      const account = await request(`/accounts/${encodeURIComponent(source.creditRemainder.providerAccountId)}`, { headers });
+      if (account.itemId !== source.itemId || account.type !== 'CREDIT' || account.subtype !== 'CREDIT_CARD' || account.currencyCode !== 'BRL' || !Number.isFinite(account.balance) || account.balance < 0) throw new Error('Invalid credit liability snapshot');
+      creditDebt = Math.round(account.balance * 100);
+      if (!Number.isSafeInteger(creditDebt)) throw new Error('Invalid credit liability amount');
+    }
+    snapshots.push({ source, ...summary, date, cash, creditDebt, refreshedAt: item.lastUpdatedAt });
   }
   return snapshots;
 }
@@ -111,11 +118,21 @@ export async function setValuation(api, { accountId, key, total, date, notes }) 
 export async function syncValuations(api, snapshots) {
   // Validate every target before writing any valuation.
   const accounts = await api.getAccounts();
-  const ids = snapshots.map(s => s.source.accountId);
+  const ids = snapshots.flatMap(s => [s.source.accountId, ...(s.source.creditRemainder ? [s.source.creditRemainder.accountId] : [])]);
   if (new Set(ids).size !== ids.length || ids.some(id => !id)) throw new Error('Missing or duplicate investment target account');
   for (const id of ids) {
     const a = accounts.find(a => a.id === id);
     if (!a?.offbudget || a.closed) throw new Error('Investment target must be open and off-budget');
+  }
+  const creditTargets = new Map();
+  for (const snapshot of snapshots.filter(s => s.source.creditRemainder)) {
+    const config = snapshot.source.creditRemainder;
+    const ledger = accounts.find(a => a.id === config.ledgerAccountId);
+    if (!ledger || ledger.closed || ledger.offbudget || !Number.isSafeInteger(snapshot.creditDebt) || snapshot.creditDebt < 0) throw new Error('Invalid credit ledger or amount');
+    const booked = await api.getAccountBalance(ledger.id);
+    const remainder = -snapshot.creditDebt - booked;
+    if (!Number.isSafeInteger(booked) || booked > 0 || !Number.isSafeInteger(remainder) || remainder > 0) throw new Error('Booked card debt exceeds provider total; reconcile the card before updating its remainder');
+    creditTargets.set(snapshot.source.key, remainder);
   }
   const results = [];
   for (const snapshot of snapshots) {
@@ -123,6 +140,13 @@ export async function syncValuations(api, snapshots) {
     results.push({ key: snapshot.source.key, ...await setValuation(api, {
       accountId: snapshot.source.accountId, key: snapshot.source.key, total: snapshot.total, date: snapshot.date, notes,
     }) });
+    if (snapshot.source.creditRemainder) {
+      results.push({ key: snapshot.source.key + '-credit-remainder', ...await setValuation(api, {
+        accountId: snapshot.source.creditRemainder.accountId, key: snapshot.source.key + '-credit-remainder',
+        total: creditTargets.get(snapshot.source.key), date: snapshot.date,
+        notes: `Passivo complementar: limite utilizado BRL ${snapshot.creditDebt / 100} menos dívida já registrada no cartão. Inclui parcelas futuras e movimentos ainda não detalhados; não é despesa nem receita. Coleta ${snapshot.refreshedAt}.`,
+      }) });
+    }
   }
   return results;
 }

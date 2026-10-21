@@ -210,3 +210,23 @@ Local regression checks:
 node --test k8s/apps/actual/investment-sync.test.mjs
 node --check k8s/apps/actual/run-bank-sync.mjs
 ```
+
+### Credit liabilities not yet itemized in the budget
+
+An investment source may optionally configure `creditRemainder` with
+`providerAccountId` (the associated Pluggy credit-card account), `ledgerAccountId`
+(the reconciled on-budget card), and `accountId` (a separate off-budget liability).
+These private identifiers belong in the existing sources Secret, never in Git.
+The source must expose a total used credit limit, including future installments.
+
+After bank sync, the complementary liability is the negative provider debt minus
+its already-booked card balance. This keeps future installments and unitemized
+purchases in net worth without reporting them as current spending. As a charge
+arrives in the card ledger, the complementary balance falls by the same amount;
+repeat runs update one daily valuation rather than adding duplicate debt.
+
+This does not replace statement reconciliation: the on-budget ledger must first
+match a verified bill. A positive card balance, a booked debt larger than the
+provider total, an invalid/closed target, or an invalid provider amount fails the
+update. Source freshness checks are the same as investment valuations. The
+complementary account is a liability and can remain a negative off-budget account.
