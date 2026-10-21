@@ -100,9 +100,20 @@ handling, certificate reflection and UI functionality remain post-sync checks.
 
 ## Bank sync automation (Pluggy.ai)
 
-Actual has **no native daily bank-sync schedule**. This app ships a CronJob
+This installation uses a server-side CronJob
 `actual-bank-sync` that runs `@actual-app/api` `runBankSync()` daily at
 **06:00 America/Fortaleza** against the in-cluster Actual Service.
+
+The runner pins `@actual-app/api` to **26.10.0**, matching the deployed Actual
+release. Update this pin alongside Actual upgrades: an older client can fail
+with `out-of-sync-migrations` after a browser migrates the budget. The configured
+Sync ID is required; a failed load never falls back to a different budget.
+`getAccounts()` verifies that the budget really opened before fetching bank data.
+Failures publishing the synced budget also fail the job.
+
+Set `ACTUAL_SYNC_DRY_RUN=true` on a one-off Job to verify authentication and budget
+compatibility without requesting bank transactions. This still downloads the
+budget into the Job's temporary directory. Remove the flag for the actual sync.
 
 ### One-time Secret (required, not in Git)
 
