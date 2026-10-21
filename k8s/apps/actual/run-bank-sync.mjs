@@ -3,6 +3,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { createRequire } from 'module';
 import { execSync } from 'child_process';
+import { fetchSnapshots, syncValuations } from './investment-sync.mjs';
 
 const require = createRequire(import.meta.url);
 const serverURL = process.env.ACTUAL_SERVER_URL;
@@ -54,6 +55,20 @@ try {
 } catch (e) {
   console.log('bank_sync_error', e?.message || String(e), 'code', e?.code || null);
   process.exitCode = 3;
+}
+if (process.env.ACTUAL_INVESTMENTS_ENABLED === 'true') {
+  try {
+    const snapshots = await fetchSnapshots({
+      clientId: process.env.PLUGGY_CLIENT_ID,
+      clientSecret: process.env.PLUGGY_CLIENT_SECRET,
+      sources: JSON.parse(process.env.ACTUAL_INVESTMENT_SOURCES || 'null'),
+    });
+    const results = await syncValuations(api, snapshots);
+    console.log('investment_sync_ok', 'sources=' + results.length, 'changed=' + results.filter(r => r.changed).length);
+  } catch (e) {
+    console.error('investment_sync_error', e?.message || String(e));
+    process.exitCode = 5;
+  }
 }
 try {
   await api.sync();

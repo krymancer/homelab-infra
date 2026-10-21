@@ -57,6 +57,23 @@ spec:
                     secretKeyRef:
                       name: actual-auto-sync
                       key: budgetSyncId
+                - name: ACTUAL_INVESTMENTS_ENABLED
+                  value: "true"
+                - name: PLUGGY_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: actual-investment-sync
+                      key: clientId
+                - name: PLUGGY_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: actual-investment-sync
+                      key: clientSecret
+                - name: ACTUAL_INVESTMENT_SOURCES
+                  valueFrom:
+                    secretKeyRef:
+                      name: actual-investment-sync
+                      key: sources
                 - name: NODE_ENV
                   value: production
               command: ["node", "/scripts/run-bank-sync.mjs"]

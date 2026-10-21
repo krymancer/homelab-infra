@@ -13,6 +13,7 @@ configMapGenerator:
     namespace: actual
     files:
       - run-bank-sync.mjs
+      - investment-sync.mjs
     options:
       disableNameSuffixHash: true
       annotations:
