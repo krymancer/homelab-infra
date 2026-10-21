@@ -138,3 +138,75 @@ kubectl -n actual logs -f job/actual-bank-sync-manual-...
 ```
 
 This is independent of AUVP/auvp-financas Pluggy sync.
+
+## Investment valuations (Pluggy)
+
+The same 06:00 job also reads Pluggy's **investments** endpoint. Actual's built-in
+Pluggy integration only imports accounts and account transactions; a brokerage
+cash account is not the portfolio held by that brokerage.
+
+`investment-sync.mjs` writes aggregate BRL valuations into explicitly configured
+**off-budget** accounts. It excludes fully redeemed and pending positions,
+requires complete pagination and unique investment IDs, and refuses stale,
+unsupported-currency, or unsuccessful responses. Item refresh must be within
+seven days; every active holding's valuation must be within 45 days. These are
+latest available snapshots, not live prices. Notes retain the valuation-date
+range and provider refresh time.
+
+Every update is a dated adjustment to the account's existing balance, not a
+second deposit of the whole portfolio. A deterministic transaction ID allows a
+same-day correction without duplicate transactions. A no-change rerun makes no
+write. Later real contributions/withdrawals already in the account are included
+when computing the remaining adjustment. These adjustments combine valuation
+changes and any unrecorded investment flows: **do not report them as pure return,
+salary, dividends, or realized profit**. Budget categories are not changed.
+
+### Private configuration
+
+The `actual-investment-sync` Kubernetes Secret contains:
+
+- `clientId` and `clientSecret`: the existing Pluggy application credentials.
+- `sources`: a JSON array with one entry per aggregated portfolio. Each entry has
+  `key` (stable lowercase identifier), `itemId` (Pluggy connection), `accountId`
+  (Actual target), and `accountName` (setup name).
+
+Do not commit credentials, connection IDs, budget exports, or real source JSON.
+The Secret must be provisioned before enabling the updated CronJob. It is a
+separate copy of the existing Actual Pluggy credentials; update it if those
+credentials or connections change. `ACTUAL_INVESTMENTS_ENABLED=false` disables
+only this extension, leaving normal bank synchronization enabled.
+
+### Initial setup and validation
+
+`investment-setup.mjs` defaults to `validate`. It downloads and exports the budget,
+then launches a separate process with a fresh data directory and **no Actual
+server URL or credentials**. That process imports the detached export and checks
+account setup, exact valuations, preserved on-budget balances, and duplicate-free
+repeat runs. It does not publish the detached copy.
+
+The one-time `apply` mode performs the same setup against the configured budget
+and calls `api.sync()`. Before applying, take a private backup of the complete
+Actual data and verify the detached validation. Run setup in an isolated one-off
+Job, not the recurring CronJob, using the same Secret references. Mount the
+setup script and `investment-sync.mjs` together. Capture `SETUP_ACCOUNT_IDS` and
+save those target IDs into the private `sources` configuration before enabling
+recurring investment sync.
+
+Optional setup-only source fields:
+
+- `legacyAccountIds`: off-budget accounts to consolidate. Actual transfers their
+  balances into the aggregate account and closes them, preserving history.
+- `cashAccountId`, `cashAccountName`, `providerCashAccountId`: an existing linked
+  brokerage cash account to relabel and reconcile once against Pluggy's cash
+  balance. Its bank-sync link stays attached; the portfolio is held separately.
+
+Recurring runs never close accounts or reset brokerage cash. Legacy source
+fields may be removed from the Secret after setup. Existing spending-account
+balance discrepancies are outside this investment migration.
+
+Local regression checks:
+
+```bash
+node --test k8s/apps/actual/investment-sync.test.mjs
+node --check k8s/apps/actual/run-bank-sync.mjs
+```
