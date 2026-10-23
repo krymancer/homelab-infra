@@ -10,6 +10,10 @@ metadata:
 data:
   configuration.yaml: |
     # Seeded once. Later edits belong on the PVC, not in this ConfigMap.
+    # default_config loads cloud and my. SmartThings sign-in uses the
+    # Home Assistant Cloud account link, and Tuya uses a QR code. Neither
+    # redirect lands on this ingress, so homeassistant.external_url is
+    # intentionally unset. A homeassistant: block would lock General settings.
     default_config:
 
     http:
