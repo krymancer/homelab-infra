@@ -1,4 +1,4 @@
-# Termix 2.9.2
+# Termix 26.10.5
 
 ## Retained service status
 
@@ -14,8 +14,8 @@ Persistence is not a backup. This promotion adds no backup schedule, independent
 backup destination, restore test, HA or production-readiness guarantee. Retain
 application data and its matching credentials/encryption material together.
 
-Image uses `ghcr.io/lukegus/termix:release-2.9.2`, the publishing path verified in the
-**Termix-SSH/Termix** release workflow (the Helm repository default differs; `:2.9.2` publishes the same index).
+Image uses `ghcr.io/lukegus/termix:26.10.5-full` (the `-full` variant bundles every official plugin, matching the 2.9.x feature set), the publishing path verified in the
+**Termix-SSH/Termix** release workflow (26.x moved to calendar versions; `ghcr.io/termix-ssh/termix` publishes the same index).
 SQLite/state on a 2Gi local-path PVC; requests 192Mi / limit 512Mi. Only the web
 port 8080 is exposed by ClusterIP/Ingress; internal backend ports (including
 loopback-only guacd 4822) stay unexposed.
@@ -57,7 +57,8 @@ private until this first-account claim is completed. `termix-crypto` supplies ra
 `INTERNAL_AUTH_TOKEN`; no key values or private credential files are in Git.
 Do not regenerate these keys on upgrades; back them up together with the PVC.
 
-`ENABLE_TELEMETRY=false` locks telemetry off. `ENABLE_GUACAMOLE=true` with
+`ENABLE_TELEMETRY=false` locks telemetry off. `REMOTE_DESKTOP_ENGINE=guacd` (26.x replaced
+`ENABLE_GUACAMOLE`; the default `builtin` engine needs no guacd) with
 `GUACD_HOST=127.0.0.1` and `GUACD_PORT=4822` enables RDP/VNC/Telnet through a
 same-pod `guacd` sidecar (`guacamole/guacd:1.6.0`). `GUACD_TUNNEL_HOST=127.0.0.1`
 matches the sidecar layout (upstream compose uses the `termix` service name;
@@ -109,16 +110,16 @@ All containers run as UID/GID 1000 with RuntimeDefault seccomp.
 
 ## Verified upstream images
 
-- `ghcr.io/lukegus/termix:release-2.9.2@sha256:d64c841a560c54aa7c27b0e6bbd2fbf8b51073565040d2a6bfbc127f0a72cf1e`
+- `ghcr.io/lukegus/termix:26.10.5-full@sha256:f89ffee5d628f3bbb326033a1697f6426919989fda5044b6f29363dd0c361c90`
 - `guacamole/guacd:1.6.0@sha256:8974eaa9ba32f713daf311e7cc8cd7e4cdfba1edea39eed75524e78ef4b08f4f`
 
 ## Sources (stable release + registry verified)
 
-- https://github.com/Termix-SSH/Termix/releases/tag/release-2.9.2-tag
-- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/docker/docker-compose.yml
-- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/starter.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/utils/system-crypto.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/utils/guacd-config.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/hosts/guacamole/jump-tunnel-endpoint.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/hosts/guacamole/drive-settings.ts
-- https://github.com/Termix-SSH/Termix/blob/release-2.9.2-tag/src/backend/hosts/collab/runtime-store.ts
+- https://github.com/Termix-SSH/Termix/releases/tag/v26.10.5
+- https://github.com/Termix-SSH/Termix/blob/v26.10.5/docker/docker-compose.yml
+- https://github.com/Termix-SSH/Termix/blob/v26.10.5/src/backend/starter.ts
+- https://github.com/Termix-SSH/Termix/blob/v26.10.5/src/backend/utils/system-crypto.ts
+- https://github.com/Termix-SSH/Termix/blob/v26.10.5/src/backend/utils/guacd-config.ts
+- https://github.com/Termix-SSH/Termix/blob/v26.10.5/src/backend/hosts/guacamole/jump-tunnel-endpoint.ts
+- https://github.com/Termix-SSH/Termix/blob/v26.10.5/src/backend/hosts/guacamole/drive-settings.ts
+- https://github.com/Termix-SSH/Termix/blob/v26.10.5/src/backend/hosts/collab/runtime-store.ts

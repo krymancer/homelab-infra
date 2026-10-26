@@ -16,8 +16,8 @@ application data and its matching credentials/encryption material together.
 
 ## Pinned, minimal deployment
 
-- Release **v5.3.2**, published 2026-09-26. v6.0.1 is the newest GitHub release and is not deployed (breaking self-host upgrade).
-- App: `ghcr.io/reactive-resume/reactive-resume:v5.3.2`, pinned by OCI index digest in `deployment.yaml`. The v5.3.2 image is published on the `reactive-resume` GHCR org; `amruthpillai/reactive-resume` stops at v5.3.0.
+- Release **v6.0.6**. The v6.0.0 startup migration is one-way: rolling back to v5 requires restoring a database backup. `TRUSTED_PROXIES=10.42.0.0/24` lets per-visitor auth rate limits see real client IPs behind Traefik.
+- App: `ghcr.io/reactive-resume/reactive-resume:v6.0.6`, pinned by OCI index digest in `deployment.yaml`. The image is published on the `reactive-resume` GHCR org; `amruthpillai/reactive-resume` stops at v5.3.0.
 - Database: independent `postgres:16.15-bookworm`, pinned by OCI index digest in `postgres.yaml`.
 - Two containers only: app + PostgreSQL. **No Browserless/Chromium, Redis, S3/MinIO/SeaweedFS**.
   The *released v5.3.2 documentation*, not main, explicitly says browser-side PDF generation replaced Browserless in v5.1.0.
@@ -58,7 +58,7 @@ Read it only in a private local editor/password manager; do not paste it into ch
 ## Saved AI-provider credential encryption
 
 The app also requires the out-of-band Secret `reactive-resume-ai-encryption`, key
-`ENCRYPTION_SECRET`, before its Deployment can start. v5.3.2 requires at least
+`ENCRYPTION_SECRET`, before its Deployment can start. v6 requires at least
 32 characters; use a dedicated cryptographically random 32-byte hex value (64 characters).
 Do not reuse or rotate `AUTH_SECRET` or database credentials to satisfy this requirement.
 The deployment references the Secret through `secretKeyRef`; no key belongs in Git.
@@ -93,7 +93,8 @@ are not configured**. No Redis/S3 services are added for provider management.
 2. Open **https://resume.homelab.krymancer.dev** and register your own username/email with the private file's
    generated `login_password`. **An account is not created by provisioning**; that password is a prepared signup credential.
 3. SMTP is intentionally absent. In this release email verification is not required for sign-in;
-   verification/reset messages are logged by the app. Treat application logs as sensitive.
+   since v6.0.2 verification/reset messages are no longer logged in production, so without SMTP
+   password-reset links are lost. Configure SMTP before relying on password reset.
 4. After the intended users register, set `FLAG_DISABLE_SIGNUPS` to `"true"` in `deployment.yaml` and let GitOps reconcile.
    Do not disable email/password auth, which is the only configured login method.
 5. Create a resume, upload a photo, export a PDF in the browser, sign out/in, and verify data survives a controlled restart.

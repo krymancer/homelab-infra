@@ -17,7 +17,7 @@ application data and its matching credentials/encryption material together.
 ## Pinned deployment and isolation
 
 - Current stable **2026.8.3**, published 2026-09-17.
-- Server and worker: `ghcr.io/goauthentik/server:2026.8.3`, pinned by OCI index digest.
+- Server and worker: `ghcr.io/goauthentik/server:2026.8.5`, pinned by OCI index digest.
 - Independent PostgreSQL: `postgres:16.15-bookworm`, pinned by OCI index digest (supported range: PostgreSQL 14–18).
 - Plain Kubernetes manifests faithfully adapt the **released 2026.8.3** official Compose services:
   server + worker + PostgreSQL. **No Redis** is required by this release.
@@ -104,10 +104,10 @@ No workload was deployed during preparation. The retained installation is now de
 through ArgoCD; preparation checks are not claims of current login/restore testing.
 
 Official release-specific references:
-- https://github.com/goauthentik/authentik/releases/tag/version/2026.8.3
-- https://github.com/goauthentik/authentik/blob/version/2026.8.3/lifecycle/container/compose.yml
-- https://github.com/goauthentik/authentik/blob/version/2026.8.3/website/docs/install-config/automated-install.mdx
-- https://github.com/goauthentik/authentik/blob/version/2026.8.3/website/docs/install-config/configuration/configuration.mdx
-- https://github.com/goauthentik/authentik/blob/version/2026.8.3/authentik/lib/default.yml
-- https://github.com/goauthentik/authentik/blob/version/2026.8.3/lifecycle/container/Dockerfile
+- https://github.com/goauthentik/authentik/releases/tag/version/2026.8.5
+- https://github.com/goauthentik/authentik/blob/version/2026.8.5/lifecycle/container/compose.yml
+- https://github.com/goauthentik/authentik/blob/version/2026.8.5/website/docs/install-config/automated-install.mdx
+- https://github.com/goauthentik/authentik/blob/version/2026.8.5/website/docs/install-config/configuration/configuration.mdx
+- https://github.com/goauthentik/authentik/blob/version/2026.8.5/authentik/lib/default.yml
+- https://github.com/goauthentik/authentik/blob/version/2026.8.5/lifecycle/container/Dockerfile
 - https://docs.goauthentik.io/install-config/install/docker-compose/
