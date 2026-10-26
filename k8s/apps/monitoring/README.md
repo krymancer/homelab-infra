@@ -126,8 +126,8 @@ Allow **9100/tcp** from the k3s VM (`192.168.0.20`) if the PVE firewall is on. O
 | `blackbox-exporter` | HTTP + DNS modules. **No ICMP** (would need `CAP_NET_RAW`; skipped). |
 | Probe `blackbox-http` | job `blackbox_http` → `https://1.1.1.1`, `https://google.com` |
 | Probe `blackbox-dns-*` | jobs `blackbox_dns_google` / `blackbox_dns_cloudflare` → A lookup via `1.1.1.1` |
-| `speedtest-exporter` | `ghcr.io/ishioni/speedtest-exporter:0.2.6` (Ookla CLI). Cache **45m**, ServiceMonitor interval **45m**, timeout **120s**. Metric names match the Internet dashboard. |
-| `pve-exporter` | `prompve/prometheus-pve-exporter:3.10.1` against `https://192.168.0.11:8006` |
+| `speedtest-exporter` | `ghcr.io/ishioni/speedtest-exporter:0.2.7` (Ookla CLI). Cache **45m**, ServiceMonitor interval **45m**, timeout **120s**. Metric names match the Internet dashboard. |
+| `pve-exporter` | `prompve/prometheus-pve-exporter:3.10.2` against `https://192.168.0.11:8006` |
 
 ## Dashboards (ConfigMaps `grafana_dashboard=1`, folder Homelab)
 

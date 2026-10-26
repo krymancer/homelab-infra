@@ -27,7 +27,7 @@ spec:
           value: '0'
       containers:
       - name: http
-        image: ghcr.io/lukegus/termix:release-2.9.2@sha256:d64c841a560c54aa7c27b0e6bbd2fbf8b51073565040d2a6bfbc127f0a72cf1e
+        image: ghcr.io/lukegus/termix:26.10.5-full@sha256:f89ffee5d628f3bbb326033a1697f6426919989fda5044b6f29363dd0c361c90
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsNonRoot: true
@@ -73,8 +73,8 @@ spec:
           value: /app/data
         - name: NODE_ENV
           value: production
-        - name: ENABLE_GUACAMOLE
-          value: 'true'
+        - name: REMOTE_DESKTOP_ENGINE
+          value: guacd
         - name: GUACD_HOST
           value: 127.0.0.1
         - name: GUACD_PORT
@@ -172,7 +172,7 @@ spec:
         - name: data
           mountPath: /termix-data
       - name: tailscale
-        image: tailscale/tailscale:v1.102.5@sha256:c507f3a2a6ab1cabd8d809b98edeb41edbd5c3fb6ad9632ffd098b4c7d0b4065
+        image: tailscale/tailscale:v1.104.2@sha256:b11583ad2e93e4671128538c88cf11f460444a5d7e449311dd1933a400ab849d
         imagePullPolicy: IfNotPresent
         command: [tailscaled]
         args:
@@ -207,7 +207,7 @@ spec:
           mountPath: /var/run/tailscale
       - name: tailscale-dns
         # Reuse the existing pinned image's Node runtime; no package installs.
-        image: ghcr.io/lukegus/termix:release-2.9.2@sha256:d64c841a560c54aa7c27b0e6bbd2fbf8b51073565040d2a6bfbc127f0a72cf1e
+        image: ghcr.io/lukegus/termix:26.10.5-full@sha256:f89ffee5d628f3bbb326033a1697f6426919989fda5044b6f29363dd0c361c90
         imagePullPolicy: IfNotPresent
         command: [/usr/local/bin/node, /config/dns-forwarder.cjs]
         securityContext:

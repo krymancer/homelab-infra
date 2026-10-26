@@ -29,11 +29,10 @@ remote-management:
   # route and GET /management.html returns 404.
   disable-control-panel: false
 
-  # Keep true on v7.3.7. The binary's updater always fetches releases/latest,
-  # and Management Center v1.25.0+ calls /v8/management, which this server does
-  # not implement. The Deployment seeds v1.24.2 (the last /v0 panel) on a
-  # read-only volume. Flipping this to false does not change that file, but it
-  # will log failed update attempts.
+  # Keep true. The binary's updater always fetches releases/latest, but the
+  # Deployment seeds a pinned panel (v1.26.7) on a read-only volume. Flipping
+  # this to false does not change that file, but it will log failed update
+  # attempts.
   disable-auto-update-panel: true
 api-keys:
   - API_KEY_PLACEHOLDER

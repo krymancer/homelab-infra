@@ -39,20 +39,19 @@ spec:
         runAsGroup: 10001
         fsGroup: 10001
         fsGroupChangePolicy: OnRootMismatch
-      # v7.3.7 does not embed management.html. It downloads Cli-Proxy-API-Management-Center
-      # releases/latest into static/ next to the config file. That directory is the read-only
-      # Secret mount, and releases since v1.25.0 call /v8/management, which this binary does
-      # not serve. Seed the last /v0 panel (v1.24.2) before the process starts.
+      # The binary does not embed management.html. It downloads Cli-Proxy-API-Management-Center
+      # releases/latest into static/ next to the config file, which is the read-only Secret
+      # mount. Seed a pinned panel (v1.26.7, calls /v0 and /v8 management) before start.
       initContainers:
       - name: management-panel
-        image: docker.io/curlimages/curl:8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
+        image: docker.io/curlimages/curl:8.23.0@sha256:11e64e28c5f58c8d93ee95fcf22ac055f48b0bc440e0ce7d8013bbb5ad6aa8ac
         command: [/bin/sh, -c]
         args:
         - |
           set -eu
           dest=/var/lib/cliproxy-management/management.html
-          url=https://github.com/router-for-me/Cli-Proxy-API-Management-Center/releases/download/v1.24.2/management.html
-          expected=51b24db8170a5414875602c2f4e35017185b1c1dd7e9a6b1c0de69905a81e997
+          url=https://github.com/router-for-me/Cli-Proxy-API-Management-Center/releases/download/v1.26.7/management.html
+          expected=8c9c6b7d3fb311e6aad5d06e1993e53a2d28389e640448a1bc6304ed20b057b5
           i=0
           while [ "$i" -lt 5 ]; do
             i=$((i + 1))
@@ -75,7 +74,7 @@ spec:
         - {name: tmp, mountPath: /tmp}
       containers:
       - name: api
-        image: eceasy/cli-proxy-api:v7.3.7@sha256:4ce7b1b52f8d7e176c2047870a1f312ceb44a7e1b7aa7367dc80d6ffc9671fe7
+        image: eceasy/cli-proxy-api:v8.0.44@sha256:be365a6b3ca2b54947e9248c7bb7e1cdb974f66c922d2354b85daec2ad5cc201
         command: [/bin/sh, -c]
         args: ['umask 077; exec /CLIProxyAPI/CLIProxyAPI -config /config/config.yaml']
         env:
@@ -196,6 +195,12 @@ spec:
             name: cliproxyapi
             port: {number: 80}
       - path: /v0/management
+        pathType: Prefix
+        backend:
+          service:
+            name: cliproxyapi
+            port: {number: 80}
+      - path: /v8/management
         pathType: Prefix
         backend:
           service:

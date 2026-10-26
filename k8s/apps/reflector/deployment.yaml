@@ -20,7 +20,7 @@ spec:
         fsGroup: 2000
       containers:
         - name: reflector
-          image: emberstack/kubernetes-reflector:10.0.65
+          image: emberstack/kubernetes-reflector:10.0.68
           imagePullPolicy: IfNotPresent
           securityContext:
             capabilities:

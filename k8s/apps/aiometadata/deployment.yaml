@@ -61,7 +61,7 @@ spec:
               cpu: 1000m
         - name: redis
           # 3.4.0 refuses to boot without HSETEX (Redis 8.0+). 7-alpine is 7.4.11.
-          image: redis:8.10.2-alpine
+          image: redis:8.10.3-alpine
           args: ["--maxmemory", "96mb", "--maxmemory-policy", "allkeys-lru", "--save", ""]
           ports:
             - containerPort: 6379
