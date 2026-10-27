@@ -50,7 +50,7 @@ GitOps covers **extras only** (exporters, Probe/ServiceMonitor CRs, dashboard Co
 
 Grafana login stays chart default **`admin` / `admin`** (do not change it in this tree). Datasource UID is `prometheus` (static `grafana.datasources` provisioning).
 
-The daily driver is Homepage at [https://home.homelab.krymancer.dev](https://home.homelab.krymancer.dev). Grafana’s home dashboard is the **Alt / Homelab Host** overview (`alt-homelab-host`), not a replacement for Homepage.
+The daily driver is Glance at [https://home.homelab.krymancer.dev](https://home.homelab.krymancer.dev). Grafana’s home dashboard is the **Alt / Homelab Host** overview (`alt-homelab-host`), not a replacement for Homepage.
 
 ## Apply order
 
