@@ -1,0 +1,356 @@
+# Glance auto-reloads glance.yml when this ConfigMap changes (no restart).
+# check-url points at in-cluster Services so status checks skip Traefik/TLS;
+# url is what the browser opens.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: glance-config
+  namespace: glance
+data:
+  glance.yml: |
+    server:
+      proxied: true
+
+    branding:
+      hide-footer: false
+
+    theme:
+      background-color: 240 8 9
+      primary-color: 43 59 81
+      positive-color: 61 66 44
+      negative-color: 6 96 59
+      contrast-multiplier: 1.1
+
+    # Reusable host-health template. Each tile reads one Prometheus instant
+    # query from a subrequest named after it.
+    custom-widgets:
+      - &health
+        type: custom-api
+        cache: 30s
+        url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+        parameters:
+          query: vector(1)
+        template: |
+          {{ $cpu := (.Subrequest "cpu").JSON.Float "data.result.0.value.1" }}
+          {{ $cores := (.Subrequest "cores").JSON.Float "data.result.0.value.1" }}
+          {{ $mem := (.Subrequest "mem").JSON.Float "data.result.0.value.1" }}
+          {{ $memUsed := (.Subrequest "memused").JSON.Float "data.result.0.value.1" }}
+          {{ $memTotal := (.Subrequest "memtotal").JSON.Float "data.result.0.value.1" }}
+          {{ $disk := (.Subrequest "disk").JSON.Float "data.result.0.value.1" }}
+          {{ $diskAvail := (.Subrequest "diskavail").JSON.Float "data.result.0.value.1" }}
+          {{ $store := (.Subrequest "store").JSON.Float "data.result.0.value.1" }}
+          {{ $storeAvail := (.Subrequest "storeavail").JSON.Float "data.result.0.value.1" }}
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:2.5rem;">
+            <div>
+              <div class="flex justify-between items-end size-h5"><span class="uppercase">CPU</span><span class="color-highlight size-h4">{{ printf "%.1f" $cpu }}%</span></div>
+              <div class="progress-bar margin-top-5"><div class="progress-value{{ if ge $cpu 85.0 }} progress-value-notice{{ end }}" style="--percent: {{ printf "%.0f" $cpu }}"></div></div>
+              <div class="size-h6 margin-top-5">{{ printf "%.0f" $cores }} logical cores</div>
+            </div>
+            <div>
+              <div class="flex justify-between items-end size-h5"><span class="uppercase">RAM</span><span class="color-highlight size-h4">{{ printf "%.0f" $mem }}%</span></div>
+              <div class="progress-bar margin-top-5"><div class="progress-value{{ if ge $mem 85.0 }} progress-value-notice{{ end }}" style="--percent: {{ printf "%.0f" $mem }}"></div></div>
+              <div class="size-h6 margin-top-5">{{ printf "%.1f" (div $memUsed 1073741824.0) }} / {{ printf "%.1f" (div $memTotal 1073741824.0) }} GiB used</div>
+            </div>
+            <div>
+              <div class="flex justify-between items-end size-h5"><span class="uppercase">System disk</span><span class="color-highlight size-h4">{{ printf "%.0f" $disk }}%</span></div>
+              <div class="progress-bar margin-top-5"><div class="progress-value{{ if ge $disk 85.0 }} progress-value-notice{{ end }}" style="--percent: {{ printf "%.0f" $disk }}"></div></div>
+              <div class="size-h6 margin-top-5">{{ printf "%.1f" (div $diskAvail 1073741824.0) }} GiB available</div>
+            </div>
+            <div>
+              <div class="flex justify-between items-end size-h5"><span class="uppercase">{{ .Options.StringOr "store-label" "Storage" }}</span><span class="color-highlight size-h4">{{ printf "%.0f" $store }}%</span></div>
+              <div class="progress-bar margin-top-5"><div class="progress-value{{ if ge $store 85.0 }} progress-value-notice{{ end }}" style="--percent: {{ printf "%.0f" $store }}"></div></div>
+              <div class="size-h6 margin-top-5">{{ .Options.StringOr "store-note" "" }}{{ if gt $storeAvail 0.0 }}{{ printf "%.1f" (div $storeAvail 1073741824.0) }} GiB available{{ end }}</div>
+            </div>
+          </div>
+
+    pages:
+      - name: Home
+        width: wide
+        columns:
+          - size: full
+            widgets:
+              - type: split-column
+                max-columns: 4
+                widgets:
+                  - type: monitor
+                    title: Infrastructure
+                    cache: 1m
+                    sites:
+                      - title: Proxmox VE
+                        url: https://pve.homelab.krymancer.dev
+                        check-url: https://192.168.0.11:8006
+                        allow-insecure: true
+                        icon: di:proxmox
+                      - title: Argo CD
+                        url: https://argocd.homelab.krymancer.dev
+                        check-url: http://argocd-server.argocd.svc.cluster.local
+                        icon: di:argo-cd
+                      - title: Pi-hole
+                        url: https://pihole.homelab.krymancer.dev/admin/
+                        check-url: http://pihole-web.pihole.svc.cluster.local/admin/
+                        icon: di:pi-hole
+                      - title: Grafana
+                        url: https://grafana.homelab.krymancer.dev
+                        check-url: http://kube-prom-grafana.monitoring.svc.cluster.local/api/health
+                        icon: di:grafana
+                      - title: Prometheus
+                        url: https://prometheus.homelab.krymancer.dev
+                        check-url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/-/ready
+                        icon: di:prometheus
+                      - title: Uptime Kuma
+                        url: https://uptime.homelab.krymancer.dev
+                        check-url: http://uptime-kuma.uptime-kuma.svc.cluster.local:3001
+                        icon: di:uptime-kuma
+                      - title: Termix
+                        url: https://termix.homelab.krymancer.dev
+                        check-url: http://termix.termix.svc.cluster.local:8080/health
+                        icon: sh:termix
+                      - title: Homelable
+                        url: https://homelable.homelab.krymancer.dev
+                        check-url: http://homelable.homelable.svc.cluster.local:8080
+                        icon: mdi:sitemap
+                  - type: monitor
+                    title: Apps
+                    cache: 1m
+                    sites:
+                      - title: Home Assistant
+                        url: https://ha.homelab.krymancer.dev
+                        check-url: http://home-assistant.home-assistant.svc.cluster.local:8123
+                        icon: di:home-assistant
+                      - title: Hermes
+                        url: https://hermes.homelab.krymancer.dev
+                        check-url: http://hermes-dashboard.default.svc.cluster.local:9119
+                        alt-status-codes: [401]
+                        icon: mdi:robot-outline
+                      - title: Compass
+                        url: https://compass.homelab.krymancer.dev
+                        check-url: http://compass.compass.svc.cluster.local/api/health
+                        icon: mdi:compass-outline
+                      - title: Job Applications
+                        url: https://jobs.homelab.krymancer.dev
+                        check-url: http://job-applications.default.svc.cluster.local:8765
+                        icon: mdi:briefcase-outline
+                      - title: Paperless-ngx
+                        url: https://paperless.homelab.krymancer.dev
+                        check-url: http://paperless.paperless.svc.cluster.local:8000
+                        icon: di:paperless-ngx
+                      - title: Reactive Resume
+                        url: https://resume.homelab.krymancer.dev
+                        check-url: http://reactive-resume.reactive-resume.svc.cluster.local:3000/api/health
+                        icon: di:reactive-resume
+                      - title: Actual Budget
+                        url: https://actual.homelab.krymancer.dev
+                        check-url: http://actual.actual.svc.cluster.local:5006
+                        icon: di:actual-budget
+                      - title: hledger
+                        url: https://hledger.homelab.krymancer.dev
+                        check-url: http://hledger.hledger.svc.cluster.local:5000/journal
+                        icon: mdi:book-open-page-variant
+                  - type: monitor
+                    title: Media
+                    cache: 1m
+                    sites:
+                      - title: AIOStreams
+                        url: https://aio.homelab.krymancer.dev
+                        check-url: http://aiostreams.aiostreams.svc.cluster.local:3000
+                        icon: sh:aiostreams
+                      - title: AIOMetadata
+                        url: https://meta.homelab.krymancer.dev/configure
+                        check-url: http://aiometadata.aiometadata.svc.cluster.local:3232/health
+                        icon: mdi:movie-search-outline
+                      - title: MediaFlow Proxy
+                        url: https://flow.homelab.krymancer.dev
+                        check-url: http://mediaflow-proxy.aiostreams.svc.cluster.local:8888
+                        icon: mdi:swap-horizontal
+                      - title: Cobalt
+                        url: https://cobalt.homelab.krymancer.dev
+                        check-url: http://cobalt-web.cobalt.svc.cluster.local:8080
+                        icon: sh:cobalt
+                  - type: monitor
+                    title: Tools & Security
+                    cache: 1m
+                    sites:
+                      - title: Vaultwarden
+                        url: https://vault.homelab.krymancer.dev
+                        check-url: http://vaultwarden.vaultwarden.svc.cluster.local/alive
+                        icon: di:vaultwarden
+                      - title: authentik
+                        url: https://auth.homelab.krymancer.dev
+                        check-url: http://authentik-server.authentik.svc.cluster.local:9000/-/health/live/
+                        icon: di:authentik
+                      - title: ntfy
+                        url: https://ntfy.homelab.krymancer.dev
+                        check-url: http://ntfy.ntfy.svc.cluster.local/v1/health
+                        icon: di:ntfy
+                      - title: IT-Tools
+                        url: https://tools.homelab.krymancer.dev
+                        check-url: http://it-tools.it-tools.svc.cluster.local
+                        icon: di:it-tools
+                      - title: Excalidraw
+                        url: https://draw.homelab.krymancer.dev
+                        check-url: http://excalidraw.excalidraw.svc.cluster.local
+                        icon: di:excalidraw
+                      - title: Ladder
+                        url: https://ladder.homelab.krymancer.dev
+                        check-url: http://ladder.ladder.svc.cluster.local:8080
+                        icon: mdi:ladder
+                      - title: DashLit
+                        url: https://dashlit.homelab.krymancer.dev
+                        check-url: http://dashlit.dashlit.svc.cluster.local:8080/api/auth/config
+                        icon: mdi:view-dashboard-outline
+
+              - <<: *health
+                title: Proxmox health (alt)
+                options:
+                  store-label: VM / container storage
+                subrequests:
+                  cpu:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: 100 * (1 - avg(rate(node_cpu_seconds_total{instance="alt",mode="idle"}[5m])))
+                  cores:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: count(node_cpu_seconds_total{instance="alt",mode="idle"})
+                  mem:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: 100 * (1 - node_memory_MemAvailable_bytes{instance="alt"} / node_memory_MemTotal_bytes{instance="alt"})
+                  memused:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: node_memory_MemTotal_bytes{instance="alt"} - node_memory_MemAvailable_bytes{instance="alt"}
+                  memtotal:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: node_memory_MemTotal_bytes{instance="alt"}
+                  disk:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: 100 * (1 - node_filesystem_avail_bytes{instance="alt",mountpoint="/"} / node_filesystem_size_bytes{instance="alt",mountpoint="/"})
+                  diskavail:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: node_filesystem_avail_bytes{instance="alt",mountpoint="/"}
+                  store:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: 100 * pve_disk_usage_bytes{id="storage/alt/ssd"} / pve_disk_size_bytes{id="storage/alt/ssd"}
+                  storeavail:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: pve_disk_size_bytes{id="storage/alt/ssd"} - pve_disk_usage_bytes{id="storage/alt/ssd"}
+
+              - <<: *health
+                title: k3s node
+                options:
+                  store-label: Pods running
+                  store-note: ""
+                subrequests:
+                  cpu:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: 100 * (1 - avg(rate(node_cpu_seconds_total{job="node-exporter",mode="idle"}[5m])))
+                  cores:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: count(node_cpu_seconds_total{job="node-exporter",mode="idle"})
+                  mem:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: 100 * (1 - node_memory_MemAvailable_bytes{job="node-exporter"} / node_memory_MemTotal_bytes{job="node-exporter"})
+                  memused:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: node_memory_MemTotal_bytes{job="node-exporter"} - node_memory_MemAvailable_bytes{job="node-exporter"}
+                  memtotal:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: node_memory_MemTotal_bytes{job="node-exporter"}
+                  disk:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: 100 * (1 - node_filesystem_avail_bytes{job="node-exporter",mountpoint="/"} / node_filesystem_size_bytes{job="node-exporter",mountpoint="/"})
+                  diskavail:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: node_filesystem_avail_bytes{job="node-exporter",mountpoint="/"}
+                  store:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      # Running pods as a share of the kubelet's 110-pod limit.
+                      query: 100 * sum(kube_pod_status_phase{phase="Running"}) / sum(kube_node_status_capacity{resource="pods"})
+                  storeavail:
+                    url: http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+                    parameters:
+                      query: vector(0)
+
+              - type: split-column
+                max-columns: 2
+                widgets:
+                  - type: dns-stats
+                    title: Pi-hole
+                    service: pihole-v6
+                    url: http://pihole-web.pihole.svc.cluster.local
+                    password: ${PIHOLE_PASSWORD}
+                    hour-format: 24h
+                  - type: bookmarks
+                    title: Other links
+                    groups:
+                      - links:
+                          - title: Router
+                            url: http://192.168.0.1
+                            icon: mdi:router-wireless
+                          - title: Tailscale
+                            url: https://login.tailscale.com/admin/machines
+                            icon: di:tailscale
+                          - title: Cloudflare
+                            url: https://dash.cloudflare.com
+                            icon: di:cloudflare
+                          - title: homelab-infra
+                            url: https://github.com/krymancer/homelab-infra
+                            icon: si:github
+                          - title: My GitHub
+                            url: https://github.com/krymancer
+                            icon: si:github
+
+      - name: Feeds
+        columns:
+          - size: small
+            widgets:
+              - type: clock
+                hour-format: 24h
+                timezones:
+                  - timezone: Etc/UTC
+                    label: UTC
+              - type: calendar
+                first-day-of-week: sunday
+          - size: full
+            widgets:
+              - type: hacker-news
+                limit: 15
+                collapse-after: 6
+              - type: rss
+                title: selfh.st
+                style: detailed-list
+                limit: 10
+                collapse-after: 4
+                cache: 12h
+                feeds:
+                  - url: https://selfh.st/rss/
+          - size: small
+            widgets:
+              - type: releases
+                title: Releases
+                cache: 6h
+                show-source-icon: true
+                repositories:
+                  - home-assistant/core
+                  - k3s-io/k3s
+                  - argoproj/argo-cd
+                  - goauthentik/authentik
+                  - paperless-ngx/paperless-ngx
+                  - dani-garcia/vaultwarden
+                  - actualbudget/actual
+                  - pi-hole/FTL
+                  - glanceapp/glance

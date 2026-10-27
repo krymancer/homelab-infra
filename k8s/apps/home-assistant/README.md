@@ -3,8 +3,8 @@
 UI at https://ha.homelab.krymancer.dev. Merge to `main`. The production and
 staging app-of-apps both sync `k8s/argocd/apps/home-assistant.yaml` (automated,
 self-heal). That Application creates the namespace and applies this directory.
-Pi-hole picks up the name from `k8s/apps/pihole/configmap.yaml`. Homepage picks
-up the Apps group from its ConfigMap.
+Pi-hole picks up the name from `k8s/apps/pihole/configmap.yaml`. Glance picks
+up the Apps monitor group from its ConfigMap.
 
 The name is a private Pi-hole record for the k3s ingress (`192.168.0.20`).
 TLS is the existing `homelab-wildcard-tls` certificate. Traefik `lan-only`
