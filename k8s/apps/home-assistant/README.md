@@ -32,7 +32,7 @@ the k3s pod CIDR `10.42.0.0/16` (Traefik's pod address) plus loopback. Later
 edits stay on the PVC; changing the ConfigMap does not rewrite an existing
 file.
 
-`TZ=America/Sao_Paulo` matches Pi-hole and Open WebUI. That zone is UTC−3
+`TZ=America/Sao_Paulo` matches Pi-hole. That zone is UTC−3
 year-round, the same offset as `America/Fortaleza`.
 
 ## Discovery
@@ -40,7 +40,7 @@ year-round, the same offset as `America/Fortaleza`.
 This pod is not on `hostNetwork` and has no extra network capabilities. No
 other app in this repo uses `hostNetwork`. Pi-hole publishes DNS with a
 LoadBalancer on `192.168.0.20`; this Service stays ClusterIP and does not take
-that address or `192.168.0.23` (Ollama CT 231).
+that address.
 
 mDNS (UDP 5353) and SSDP (UDP 1900) are link-local, so they do not cross from
 the pod network onto the LAN. Devices will not auto-discover. Add them by IP
