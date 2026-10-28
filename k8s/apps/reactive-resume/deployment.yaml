@@ -44,7 +44,7 @@ spec:
         - name: FLAG_DISABLE_EMAIL_AUTH
           value: 'false'
         - name: FLAG_ALLOW_UNSAFE_AI_BASE_URL
-          value: 'false'
+          value: 'true'
         - name: FLAG_ALLOW_UNSAFE_OAUTH_REDIRECT_URI
           value: 'false'
         - name: AUTH_SECRET
