@@ -35,6 +35,21 @@ spec:
             - name: seed
               mountPath: /seed
               readOnly: true
+        # Same image as the app so this can use stdlib hashlib and zipfile.
+        # Replaces only custom_components/hacs and custom_components/bambu_lab
+        # when the pinned release is missing. Other PVC files stay put.
+        - name: install-custom-components
+          image: ghcr.io/home-assistant/home-assistant:2026.10.0@sha256:1b64d38f38d922bf9d59336451fd6453e1d614f934456af4ee3d2a51061be3a4
+          imagePullPolicy: IfNotPresent
+          command:
+            - python3
+            - /install/install.py
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: custom-components-installer
+              mountPath: /install
+              readOnly: true
       containers:
         - name: home-assistant
           # Official image. Upstream runs as root; non-root is untested.
@@ -86,3 +101,7 @@ spec:
         - name: seed
           configMap:
             name: home-assistant-seed
+        - name: custom-components-installer
+          configMap:
+            name: home-assistant-custom-components
+            defaultMode: 0444
