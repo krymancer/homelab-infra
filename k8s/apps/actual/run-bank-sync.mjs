@@ -23,6 +23,21 @@ execSync(`npm install --omit=dev --no-fund --no-audit @actual-app/api@${apiVersi
 });
 console.log('npm_install_ok', new Date().toISOString());
 
+// The in-cluster server closes idle keep-alive sockets while slow bank requests run,
+// and undici may reuse one just as it closes ("other side closed"). This job's requests
+// (bank reads, CRDT sync) are safe to repeat, so retry once. Installed before require:
+// the API captures fetch at load.
+const baseFetch = globalThis.fetch;
+globalThis.fetch = async (url, options) => {
+  try {
+    return await baseFetch(url, options);
+  } catch (e) {
+    if (e?.cause?.code !== 'UND_ERR_SOCKET') throw e;
+    console.log('fetch_retry_stale_socket', String(url));
+    return baseFetch(url, options);
+  }
+};
+
 const api = require(join(work, 'node_modules/@actual-app/api'));
 const dataDir = join(work, 'data');
 mkdirSync(dataDir, { recursive: true });
