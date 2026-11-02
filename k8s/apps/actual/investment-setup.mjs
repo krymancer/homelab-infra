@@ -10,7 +10,7 @@ const require = createRequire(import.meta.url);
 const mode = process.argv[2] || 'validate';
 const work = process.argv[3] || mkdtempSync(join(tmpdir(), 'actual-investment-'));
 if (mode !== 'offline') {
-  execFileSync('npm', ['install', '--omit=dev', '--no-fund', '--no-audit', '@actual-app/api@26.10.0'], { cwd: work, stdio: 'inherit' });
+  execFileSync('npm', ['install', '--omit=dev', '--no-fund', '--no-audit', '@actual-app/api@26.11.0'], { cwd: work, stdio: 'inherit' });
 }
 const api = require(join(work, 'node_modules/@actual-app/api'));
 let initialized = false;

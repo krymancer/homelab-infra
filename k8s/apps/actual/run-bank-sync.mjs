@@ -12,7 +12,7 @@ const budgetIdEnv = process.env.ACTUAL_BUDGET_SYNC_ID;
 if (!serverURL || !sessionToken || !budgetIdEnv) { console.error('missing env'); process.exit(1); }
 const dryRun = process.env.ACTUAL_SYNC_DRY_RUN === 'true';
 // Keep this aligned with the Actual deployment; older clients cannot open newer migrations.
-const apiVersion = '26.10.0';
+const apiVersion = '26.11.0';
 
 const work = mkdtempSync(join(tmpdir(), 'aas-'));
 mkdirSync(work, { recursive: true });
