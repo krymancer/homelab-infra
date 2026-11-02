@@ -1,0 +1,132 @@
+# Source: krymancer/car-info deploy/k8s. CI pins the image digest below on every push to main.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: car-info
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: car-info
+  namespace: car-info
+spec:
+  replicas: 1 # SQLite: exactly one writer
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: car-info
+  template:
+    metadata:
+      labels:
+        app: car-info
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: car-info
+        image: ghcr.io/krymancer/car-info@sha256:0000000000000000000000000000000000000000000000000000000000000000
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: PORT
+          value: "8080"
+        - name: DATA_DIR
+          value: /data
+        - name: BACKUP_DIR
+          value: /backups
+        - name: BACKUP_KEEP
+          value: "30"
+        - name: APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: car-info-secrets
+              key: APP_PASSWORD
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: backups
+          mountPath: /backups
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            memory: 256Mi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: car-info-data
+      - name: backups
+        persistentVolumeClaim:
+          claimName: car-info-backups
+      automountServiceAccountToken: false
+---
+# Live SQLite + attachments on node-local storage; network filesystems break SQLite locking.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: car-info-data
+  namespace: car-info
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+# Daily snapshots + attachment copies on the NAS (alt). Static NFS bind; dummy storageClassName so
+# k3s does not assign local-path. Reclaim Retain so deleting the PV never touches the NAS.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: car-info-nas-backups
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-nas-car-info
+  nfs:
+    server: 192.168.0.11
+    path: /mnt/nas/share/data/cars
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: car-info-backups
+  namespace: car-info
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: nfs-nas-car-info
+  volumeName: car-info-nas-backups
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: car-info
+  namespace: car-info
+spec:
+  selector:
+    app: car-info
+  ports:
+  - port: 80
+    targetPort: http
+    name: http
