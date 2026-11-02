@@ -14,8 +14,8 @@ Persistence is not a backup. This promotion adds no backup schedule, independent
 backup destination, restore test, HA or production-readiness guarantee. Retain
 application data and its matching credentials/encryption material together.
 
-Stable release checked against upstream releases and **v26.10.0** source:
-`ghcr.io/actualbudget/actual:26.10.0-alpine@sha256:67b1b5e9584e3e143b4f5c41e52b4506ed9cdd1072392d5ab5369f2d4fd0bffd`.
+Stable release checked against upstream releases and **v26.11.0** source:
+`ghcr.io/actualbudget/actual:26.11.0-alpine@sha256:01ac24a51c6f585aba287c1bf1e96fcda46ab16a05952817c637415213251aa3`.
 Alpine variant, non-root UID/GID 1001, port 5006; upstream `/health` probes.
 Requests: 25m CPU / 128Mi; limits: 500m / 512Mi. PVC: `actual-data`, 2Gi.
 
@@ -91,12 +91,12 @@ handling, certificate reflection and UI functionality remain post-sync checks.
 
 ## Upstream evidence
 
-- https://github.com/actualbudget/actual/releases/tag/v26.10.0
+- https://github.com/actualbudget/actual/releases/tag/v26.11.0
 - https://actualbudget.org/docs/install/docker/
 - https://actualbudget.org/docs/config/
-- https://github.com/actualbudget/actual/blob/v26.10.0/packages/sync-server/docker/alpine.Dockerfile
-- https://github.com/actualbudget/actual/blob/v26.10.0/packages/sync-server/src/app-account.js
-- https://github.com/actualbudget/actual/blob/v26.10.0/packages/sync-server/src/load-config.js
+- https://github.com/actualbudget/actual/blob/v26.11.0/packages/sync-server/docker/alpine.Dockerfile
+- https://github.com/actualbudget/actual/blob/v26.11.0/packages/sync-server/src/app-account.js
+- https://github.com/actualbudget/actual/blob/v26.11.0/packages/sync-server/src/load-config.js
 
 ## Bank sync automation (Pluggy.ai)
 
@@ -104,7 +104,7 @@ This installation uses a server-side CronJob
 `actual-bank-sync` that runs `@actual-app/api` `runBankSync()` daily at
 **06:00 America/Fortaleza** against the in-cluster Actual Service.
 
-The runner pins `@actual-app/api` to **26.10.0**, matching the deployed Actual
+The runner pins `@actual-app/api` to **26.11.0**, matching the deployed Actual
 release. Update this pin alongside Actual upgrades: an older client can fail
 with `out-of-sync-migrations` after a browser migrates the budget. The configured
 Sync ID is required; a failed load never falls back to a different budget.
