@@ -25,7 +25,7 @@ spec:
         fsGroup: 1000
       containers:
       - name: car-info
-        image: ghcr.io/krymancer/car-info@sha256:245317d73ca2e624b77cd04788f8e8b7a683e1cd0c689c4ebcc9c1bb7d2eaf69
+        image: ghcr.io/krymancer/car-info@sha256:2e2569f2673f6d35afa93c7ba140201104729e1ed0e4ebdb42be3caecc29c500
         ports:
         - containerPort: 8080
           name: http
