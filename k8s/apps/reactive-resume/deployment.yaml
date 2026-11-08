@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: reactive-resume
-        image: ghcr.io/reactive-resume/reactive-resume:v6.0.9@sha256:8d1f055248f116866be46a6e821911076a20d0419bc2ad6684249aa77d1aa820
+        image: ghcr.io/reactive-resume/reactive-resume:v6.1.0@sha256:b158308cd898db021ecd0b41024dbf4caef0ac97917b6ec6006156598b2eba72
         ports:
         - containerPort: 3000
         env:

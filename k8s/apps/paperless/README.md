@@ -2,7 +2,7 @@
 
 Document management at https://paperless.homelab.krymancer.dev.
 
-Stack: `paperless-ngx:3.4.1` + PostgreSQL 16.15 + Redis 7.4.12. Create the
+Stack: `paperless-ngx:3.4.2` + PostgreSQL 16.15 + Redis 7.4.12. Create the
 `paperless` Secret **before** the webserver and database will stay healthy.
 Refs are `optional: true` so Argo can sync the manifests first.
 
