@@ -1,7 +1,7 @@
 # Glance
 
 Dashboard at https://home.homelab.krymancer.dev (replaced Homepage). Image
-`glanceapp/glance:v0.8.7`, pinned by index digest. LAN/Tailscale only via the
+`glanceapp/glance:v0.8.8`, pinned by index digest. LAN/Tailscale only via the
 `lan-only` middleware.
 
 ## Pages
@@ -21,7 +21,7 @@ minute and Glance reloads it without a restart. Validate locally first:
 kubectl create --dry-run=client -o jsonpath='{.data.glance\.yml}' \
   -f k8s/apps/glance/configmap.yaml > /tmp/glance/glance.yml
 podman run --rm -e PIHOLE_PASSWORD=x -v /tmp/glance:/app/config:ro \
-  docker.io/glanceapp/glance:v0.8.7 --config /app/config/glance.yml config:validate
+  docker.io/glanceapp/glance:v0.8.8 --config /app/config/glance.yml config:validate
 ```
 
 Monitors use `url` for the browser link and `check-url` for an in-cluster

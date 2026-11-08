@@ -1,4 +1,4 @@
-# Homelable 3.6.0
+# Homelable 3.7.0
 
 ## Retained service status
 
@@ -98,7 +98,7 @@ All containers run as UID/GID 1000 with RuntimeDefault seccomp.
   the existing app credentials. Rollback by reverting the manifests and revoking
   only `homelable@pve!inventory`; do not delete inventory/PVC or other PVE users.
 
-## MCP endpoint (3.6.0)
+## MCP endpoint (3.7.0)
 
 - URL: `https://homelable.homelab.krymancer.dev/mcp/` (Streamable HTTP).
 - Uses the same TLS Ingress and LAN/Tailscale source allowlist as the UI. No
@@ -135,13 +135,13 @@ All containers run as UID/GID 1000 with RuntimeDefault seccomp.
 
 ## Verified upstream images
 
-- `ghcr.io/pouzor/homelable-mcp:3.6.0@sha256:42838c0733b6443bcb6aaa3310f39daa8e700817ddb1f4466ff58d5cc0013c85`
+- `ghcr.io/pouzor/homelable-mcp:3.7.0@sha256:76526f672855467053e5c64b5baaa65c4a96b9acd3ce5e2683ee3183bc158281`
 
-- `ghcr.io/pouzor/homelable-backend:3.6.0@sha256:1e501424e8c53989fcea1dc9311d46614ae159b2bfee4608a5c0cd5baee3e9dc`
-- `ghcr.io/pouzor/homelable-frontend:3.6.0@sha256:5950f4905da2ea92b2a3870066399e718987a4a23d16c368935b9ddb7901635a`
+- `ghcr.io/pouzor/homelable-backend:3.7.0@sha256:b6af85d83f42ee48de6227d25441835c12831b974d9b5fd3ab7fc3b4e551eaea`
+- `ghcr.io/pouzor/homelable-frontend:3.7.0@sha256:edb040f2bfe172d155643e190cb2f9eadc7d140a2300f88d7ed8dc7bdd5acfd7`
 
 ## Sources (stable release + registry verified)
 
-- https://github.com/Pouzor/homelable/releases/tag/v3.6.0
-- https://github.com/Pouzor/homelable/blob/v3.6.0/docker-compose.prebuilt.yml
-- https://github.com/Pouzor/homelable/blob/v3.6.0/backend/app/core/config.py
+- https://github.com/Pouzor/homelable/releases/tag/v3.7.0
+- https://github.com/Pouzor/homelable/blob/v3.7.0/docker-compose.prebuilt.yml
+- https://github.com/Pouzor/homelable/blob/v3.7.0/backend/app/core/config.py

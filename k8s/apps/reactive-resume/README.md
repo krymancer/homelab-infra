@@ -16,8 +16,8 @@ application data and its matching credentials/encryption material together.
 
 ## Pinned, minimal deployment
 
-- Release **v6.0.9**. The v6.0.0 startup migration is one-way: rolling back to v5 requires restoring a database backup. `TRUSTED_PROXIES=10.42.0.0/24` lets per-visitor auth rate limits see real client IPs behind Traefik.
-- App: `ghcr.io/reactive-resume/reactive-resume:v6.0.9`, pinned by OCI index digest in `deployment.yaml`. The image is published on the `reactive-resume` GHCR org; `amruthpillai/reactive-resume` stops at v5.3.0.
+- Release **v6.1.0**. The v6.0.0 startup migration is one-way: rolling back to v5 requires restoring a database backup. `TRUSTED_PROXIES=10.42.0.0/24` lets per-visitor auth rate limits see real client IPs behind Traefik.
+- App: `ghcr.io/reactive-resume/reactive-resume:v6.1.0`, pinned by OCI index digest in `deployment.yaml`. The image is published on the `reactive-resume` GHCR org; `amruthpillai/reactive-resume` stops at v5.3.0.
 - Database: independent `postgres:16.15-bookworm`, pinned by OCI index digest in `postgres.yaml`.
 - Two containers only: app + PostgreSQL. **No Browserless/Chromium, Redis, S3/MinIO/SeaweedFS**.
   The *released v5.3.2 documentation*, not main, explicitly says browser-side PDF generation replaced Browserless in v5.1.0.
