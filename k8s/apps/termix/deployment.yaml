@@ -27,7 +27,7 @@ spec:
           value: '0'
       containers:
       - name: http
-        image: ghcr.io/lukegus/termix:26.11.0-full@sha256:a63f82185d6ad72e1b08b75d3ce7a5b04b2a1f848059fe4ee2bee6e0240abb6a
+        image: ghcr.io/lukegus/termix:26.11.1-full@sha256:f4d3e42ffa6b7f010eda6e113693b93a94a1a9764ffb1a00dd05607c4acd685c
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsNonRoot: true
@@ -207,7 +207,7 @@ spec:
           mountPath: /var/run/tailscale
       - name: tailscale-dns
         # Reuse the existing pinned image's Node runtime; no package installs.
-        image: ghcr.io/lukegus/termix:26.11.0-full@sha256:a63f82185d6ad72e1b08b75d3ce7a5b04b2a1f848059fe4ee2bee6e0240abb6a
+        image: ghcr.io/lukegus/termix:26.11.1-full@sha256:f4d3e42ffa6b7f010eda6e113693b93a94a1a9764ffb1a00dd05607c4acd685c
         imagePullPolicy: IfNotPresent
         command: [/usr/local/bin/node, /config/dns-forwarder.cjs]
         securityContext:
