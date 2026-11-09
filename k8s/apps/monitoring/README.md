@@ -44,7 +44,7 @@ collection to decline; do not delete history or impose a low memory limit to
 force an immediate reduction. Verify target health, dashboard expressions and
 Warden's read-only collector after changing these settings.
 
-kube-prometheus-stack is a **one-shot Helm release** named `kube-prom` in namespace `monitoring` (chart **83.7.0**). It is **not** an Argo Application: wrapping that release would fight the existing Helm secret, PVCs, and operator-owned CRs.
+kube-prometheus-stack is a **one-shot Helm release** named `kube-prom` in namespace `monitoring` (chart **93.1.1**, Prometheus Operator v0.95.1, Grafana 13). It is **not** an Argo Application: wrapping that release would fight the existing Helm secret, PVCs, and operator-owned CRs.
 
 GitOps covers **extras only** (exporters, Probe/ServiceMonitor CRs, dashboard ConfigMaps) via Application `monitoring` → `k8s/apps/monitoring/extras`. Helm values for the stack live here as `values.yaml` and are applied with `helm upgrade`.
 
@@ -66,8 +66,20 @@ Uptime Kuma and Pi-hole are untouched.
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 helm upgrade kube-prom prometheus-community/kube-prometheus-stack \
-  --namespace monitoring --version 83.7.0 \
+  --namespace monitoring --version 93.1.1 \
   -f k8s/apps/monitoring/values.yaml
+```
+
+Helm does not upgrade CRDs. When moving to a new chart major, first apply the
+Prometheus Operator CRDs for the chart's `appVersion` (see the chart's
+`UPGRADE.md`), e.g. for 93.x / operator v0.95.1:
+
+```bash
+for c in alertmanagerconfigs alertmanagers podmonitors probes prometheusagents \
+         prometheuses prometheusrules scrapeconfigs servicemonitors thanosrulers; do
+  kubectl apply --server-side --force-conflicts -f \
+    https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.95.1/example/prometheus-operator-crd/monitoring.coreos.com_$c.yaml
+done
 ```
 
 What this values file changes vs a stock chart:
