@@ -22,7 +22,7 @@ spec:
             - name: API_URL
               value: "https://cobalt-api.homelab.krymancer.dev/"
             - name: YOUTUBE_SESSION_SERVER
-              value: "http://yt-session-generator:8080/"
+              value: "http://pot-provider:4416/"
           ports:
             - containerPort: 9000
               protocol: TCP
