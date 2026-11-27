@@ -17,12 +17,19 @@ spec:
     spec:
       containers:
         - name: cobalt
-          image: ghcr.io/imputnet/cobalt:11
+          # Stock 11.7.1 + imputnet/cobalt#1581 (VISIONOS client, youtubei.js
+          # 18.1), built from krymancer/cobalt@homelab-visionos. YouTube now
+          # 403s IOS-client streams past ~1MB, which made every YouTube
+          # download an empty tunnel. Go back to ghcr.io/imputnet/cobalt once
+          # upstream ships an equivalent fix.
+          image: ghcr.io/krymancer/cobalt:11.7.1-2e8c384@sha256:5c58fff013897217fffcbdce09231fcf504724af40e7811e7e78a8c9540b401e
           env:
             - name: API_URL
               value: "https://cobalt-api.homelab.krymancer.dev/"
             - name: YOUTUBE_SESSION_SERVER
               value: "http://yt-session-generator:8080/"
+            - name: CUSTOM_INNERTUBE_CLIENT
+              value: "VISIONOS"
           ports:
             - containerPort: 9000
               protocol: TCP
