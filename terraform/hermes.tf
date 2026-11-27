@@ -1,7 +1,5 @@
 resource "proxmox_virtual_environment_container" "hermes" {
-  provider = proxmox.alt
-
-  node_name = var.alt_node_name
+  node_name = var.proxmox_node
   vm_id     = var.hermes_lxc.vmid
 
   description = "Minimal Debian LXC on alt. Tailscale-attached."
@@ -12,6 +10,14 @@ resource "proxmox_virtual_environment_container" "hermes" {
 
   memory {
     dedicated = var.hermes_lxc.memory
+    swap      = 512
+  }
+
+  # NAS share bind-mounted from the host (career/Compass data).
+  mount_point {
+    volume = "/mnt/nas/share/carrer/applications"
+    path   = "/srv/career-data"
+    backup = false
   }
 
   disk {
@@ -54,12 +60,31 @@ resource "proxmox_virtual_environment_container" "hermes" {
     nesting = true
   }
 
+  console {
+    enabled   = true
+    tty_count = 2
+    type      = "tty"
+  }
+
   unprivileged  = true
   start_on_boot = true
   started       = true
+
+  lifecycle {
+    # Create-only inputs. Proxmox does not report them back after import, and a
+    # diff would force a replacement of the running container.
+    ignore_changes = [
+      initialization[0].user_account,
+      operating_system[0].template_file_id,
+    ]
+  }
 }
 
+# First-boot provisioning. Gated so a normal apply does not re-run them on the
+# live container (bootstrap overwrites authorized_keys and re-runs tailscale up).
 resource "null_resource" "hermes_tun_config" {
+  count = var.bootstrap ? 1 : 0
+
   depends_on = [proxmox_virtual_environment_container.hermes]
 
   triggers = {
@@ -68,7 +93,7 @@ resource "null_resource" "hermes_tun_config" {
 
   connection {
     type    = "ssh"
-    host    = regex("^https?://([^:/]+)", var.proxmox_alt_api_url)[0]
+    host    = regex("^https?://([^:/]+)", var.proxmox_api_url)[0]
     user    = "root"
     agent   = true
     timeout = "1m"
@@ -89,6 +114,8 @@ resource "null_resource" "hermes_tun_config" {
 }
 
 resource "null_resource" "hermes_bootstrap" {
+  count = var.bootstrap ? 1 : 0
+
   depends_on = [null_resource.hermes_tun_config]
 
   triggers = {
@@ -97,7 +124,7 @@ resource "null_resource" "hermes_bootstrap" {
 
   connection {
     type    = "ssh"
-    host    = regex("^https?://([^:/]+)", var.proxmox_alt_api_url)[0]
+    host    = regex("^https?://([^:/]+)", var.proxmox_api_url)[0]
     user    = "root"
     agent   = true
     timeout = "10m"
@@ -128,6 +155,8 @@ resource "null_resource" "hermes_bootstrap" {
 }
 
 resource "null_resource" "hermes_provision" {
+  count = var.bootstrap ? 1 : 0
+
   depends_on = [null_resource.hermes_bootstrap]
 
   triggers = {

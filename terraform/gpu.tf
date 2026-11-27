@@ -9,12 +9,11 @@
 # iommu=pt), vfio-pci ids, and the nouveau blacklist stay on the host.
 # bpg/proxmox hostpci.id is incompatible with API tokens, so mappings are used.
 #
-# Leave enable_gpu_vm = false until staging k3s cutover RAM headroom is confirmed
+# Leave enable_gpu_vm = false until RAM headroom is confirmed
 # (k3s 16G + hermes 2G on a 32G host).
 
 resource "proxmox_virtual_environment_hardware_mapping_pci" "rtx2060" {
-  provider = proxmox.alt
-  count    = var.enable_gpu_vm ? 1 : 0
+  count = var.enable_gpu_vm ? 1 : 0
 
   name    = "rtx2060"
   comment = "NVIDIA RTX 2060 12GB on alt (IOMMU group 28, 0000:03:00.0)"
@@ -24,15 +23,14 @@ resource "proxmox_virtual_environment_hardware_mapping_pci" "rtx2060" {
       comment     = "TU106 GeForce RTX 2060 12GB"
       id          = "10de:1f03"
       iommu_group = 28
-      node        = var.alt_node_name
+      node        = var.proxmox_node
       path        = "0000:03:00.0"
     },
   ]
 }
 
 resource "proxmox_virtual_environment_hardware_mapping_pci" "rtx2060_audio" {
-  provider = proxmox.alt
-  count    = var.enable_gpu_vm ? 1 : 0
+  count = var.enable_gpu_vm ? 1 : 0
 
   name    = "rtx2060-audio"
   comment = "NVIDIA RTX 2060 HD audio on alt (IOMMU group 28, 0000:03:00.1)"
@@ -42,18 +40,17 @@ resource "proxmox_virtual_environment_hardware_mapping_pci" "rtx2060_audio" {
       comment     = "TU106 HD Audio Controller"
       id          = "10de:10f9"
       iommu_group = 28
-      node        = var.alt_node_name
+      node        = var.proxmox_node
       path        = "0000:03:00.1"
     },
   ]
 }
 
 resource "proxmox_virtual_environment_vm" "gpu" {
-  provider = proxmox.alt
-  count    = var.enable_gpu_vm ? 1 : 0
+  count = var.enable_gpu_vm ? 1 : 0
 
   name        = var.gpu_vm.name
-  node_name   = var.alt_node_name
+  node_name   = var.proxmox_node
   vm_id       = var.gpu_vm.vmid
   description = "GPU passthrough scaffold (RTX 2060). Keep stopped until RAM headroom is confirmed."
 

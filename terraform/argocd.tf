@@ -1,15 +1,16 @@
-# Argo CD on staging k3s (alt VM 220). Helm provider talks to the kubeconfig
-# fetched after first boot. The Helm provider configures at plan time, so a
-# brand-new cluster needs two applies once k3s_alt_started is true:
+# From-scratch Argo CD bootstrap (bootstrap = true). The live
+# cluster's Argo CD was installed from upstream install.yaml and is NOT managed
+# here; keep bootstrap false on it or Helm would install a second copy.
+#
+# The Helm provider configures at plan time, so a brand-new cluster needs two
+# applies:
 #   1. VM + cloud-init k3s + kubeconfig file
 #   2. helm_release + root Application
-#
-# Production Argo on pve VM 200 is not managed here.
 
 resource "helm_release" "argocd" {
-  count = local.k3s_alt_bootstrap_argocd ? 1 : 0
+  count = local.k3s_bootstrap_argocd ? 1 : 0
 
-  depends_on = [terraform_data.k3s_alt_kubeconfig]
+  depends_on = [terraform_data.k3s_kubeconfig]
 
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
@@ -52,7 +53,7 @@ resource "helm_release" "argocd" {
 # Root app-of-apps. Applied with k3s kubectl on the guest so we do not need the
 # Application CRD at terraform plan time (kubernetes_manifest would).
 resource "terraform_data" "argocd_root_app" {
-  count = local.k3s_alt_bootstrap_argocd ? 1 : 0
+  count = local.k3s_bootstrap_argocd ? 1 : 0
 
   depends_on = [helm_release.argocd]
 
@@ -63,7 +64,7 @@ resource "terraform_data" "argocd_root_app" {
 
   connection {
     type    = "ssh"
-    host    = local.k3s_alt_ip
+    host    = local.k3s_ip
     user    = var.ci_user
     agent   = true
     timeout = "10m"

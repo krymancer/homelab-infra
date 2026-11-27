@@ -1,8 +1,8 @@
 # Home Assistant
 
-UI at https://ha.homelab.krymancer.dev. Merge to `main`. The production and
-staging app-of-apps both sync `k8s/argocd/apps/home-assistant.yaml` (automated,
-self-heal). That Application creates the namespace and applies this directory.
+UI at https://ha.homelab.krymancer.dev. Merge to `main`. The app-of-apps syncs
+`k8s/argocd/apps/home-assistant.yaml` (automated, self-heal). That Application
+creates the namespace and applies this directory.
 Pi-hole picks up the name from `k8s/apps/pihole/configmap.yaml`. Glance picks
 up the Apps monitor group from its ConfigMap.
 

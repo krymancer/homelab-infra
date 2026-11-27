@@ -307,8 +307,8 @@ data:
                           - title: Cloudflare
                             url: https://dash.cloudflare.com
                             icon: di:cloudflare
-                          - title: homelab-infra
-                            url: https://github.com/krymancer/homelab-infra
+                          - title: infra
+                            url: https://github.com/krymancer/infra
                             icon: si:github
                           - title: My GitHub
                             url: https://github.com/krymancer
