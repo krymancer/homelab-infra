@@ -1,7 +1,7 @@
 variable "proxmox_api_url" {
-  description = "Proxmox API URL"
+  description = "Proxmox API URL (alt)"
   type        = string
-  default     = "https://192.168.0.10:8006"
+  default     = "https://192.168.0.11:8006"
 }
 
 variable "proxmox_api_token_id" {
@@ -16,64 +16,20 @@ variable "proxmox_api_token_secret" {
   sensitive   = true
 }
 
-variable "proxmox_alt_api_url" {
-  description = "Proxmox API URL for the standalone alt host (not clustered with pve)"
-  type        = string
-  default     = "https://192.168.0.11:8006"
-}
-
-variable "proxmox_alt_api_token_id" {
-  description = "API token ID on alt (e.g. terraform@pam!terraform). Empty reuses proxmox_api_token_id."
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "proxmox_alt_api_token_secret" {
-  description = "API token secret for alt. Empty reuses proxmox_api_token_secret. Prefer a token created on alt."
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "alt_node_name" {
-  description = "Proxmox node name of the second host (hostname, not FQDN)"
+variable "proxmox_node" {
+  description = "Proxmox node name (hostname, not FQDN)"
   type        = string
   default     = "alt"
 }
 
 variable "k3s_vm" {
-  description = "Production k3s VM on pve. Leave as-is until cutover; .20 stays on this guest."
-  type = object({
-    vmid    = number
-    name    = string
-    cores   = number
-    memory  = number
-    disk    = string
-    storage = string
-    ip      = string
-    gateway = string
-  })
-  default = {
-    vmid    = 200
-    name    = "k3s"
-    cores   = 4
-    memory  = 8192
-    disk    = "40G"
-    storage = "local-lvm"
-    ip      = "192.168.0.20/24"
-    gateway = "192.168.0.1"
-  }
-}
-
-variable "k3s_alt_vm" {
-  description = "Staging k3s VM on alt. Cutover later may move services from pve VM 200 and reassign 192.168.0.20. Default IP is 192.168.0.23."
+  description = "k3s VM on alt. 192.168.0.20 is also the Pi-hole / ingress LoadBalancer IP."
   type = object({
     vmid     = number
     name     = string
     cores    = number
     memory   = number
-    balloon  = optional(number, 8192)
+    balloon  = optional(number, 16384)
     disk     = string
     storage  = string
     ip       = string
@@ -85,31 +41,25 @@ variable "k3s_alt_vm" {
     name     = "k3s"
     cores    = 8
     memory   = 16384
-    balloon  = 8192
+    balloon  = 16384
     disk     = "120G"
     storage  = "ssd"
-    ip       = "192.168.0.23/24"
+    ip       = "192.168.0.20/24"
     gateway  = "192.168.0.1"
     template = 9000
   }
 }
 
-variable "k3s_alt_started" {
-  description = "Start the staging k3s VM on alt. Keep false until Ubuntu cloud template 9000 exists on alt and you are ready to boot. Cloud-init installs k3s on first boot."
-  type        = bool
-  default     = false
-}
-
-variable "k3s_alt_snippet_datastore" {
+variable "k3s_snippet_datastore" {
   description = "Datastore on alt that allows Snippets content (usually local). Enable with: pvesm set local --content backup,iso,vztmpl,snippets"
   type        = string
   default     = "local"
 }
 
-variable "k3s_alt_bootstrap_argocd" {
-  description = "After k3s is up, install Argo CD via Helm and apply the root Application. Requires k3s_alt_started=true and a second apply once kubeconfig has been fetched to terraform/.kube/k3s-alt.yaml."
+variable "bootstrap" {
+  description = "From-scratch only: upload the k3s cloud-init snippet, run the hermes provisioners (TUN, packages, tailscale up), fetch the k3s kubeconfig, then (second apply) install Argo CD via Helm and apply the root Application. Keep false against the live guests."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "argocd_chart_version" {
@@ -119,13 +69,13 @@ variable "argocd_chart_version" {
 }
 
 variable "argocd_repo_url" {
-  description = "Git repo the staging root Application syncs"
+  description = "Git repo the root Application syncs"
   type        = string
-  default     = "https://github.com/krymancer/homelab-infra.git"
+  default     = "https://github.com/krymancer/infra.git"
 }
 
 variable "argocd_target_revision" {
-  description = "Git revision for the staging root Application (usually main)"
+  description = "Git revision for the root Application (usually main)"
   type        = string
   default     = "main"
 }
@@ -143,20 +93,14 @@ variable "argocd_git_token" {
   default     = ""
 }
 
-variable "argocd_sync_cutover_apps" {
-  description = "When false (default), staging Argo skips pihole.yaml (LoadBalancer 192.168.0.20) and cloudflared.yaml (shared tunnel). Set true only at cutover when this cluster should own those apps."
-  type        = bool
-  default     = false
-}
-
-variable "argocd_extra_exclude_app_files" {
-  description = "Additional filenames under k8s/argocd/apps to exclude from the staging root Application (e.g. [\"tailscale.yaml\"])."
+variable "argocd_exclude_app_files" {
+  description = "Filenames under k8s/argocd/apps to exclude from the bootstrapped root Application (e.g. [\"tailscale.yaml\"])."
   type        = list(string)
   default     = []
 }
 
 variable "enable_gpu_vm" {
-  description = "Create the RTX 2060 passthrough VM on alt. Leave false until staging k3s RAM headroom is confirmed."
+  description = "Create the RTX 2060 passthrough VM on alt. Leave false until RAM headroom is confirmed."
   type        = bool
   default     = false
 }

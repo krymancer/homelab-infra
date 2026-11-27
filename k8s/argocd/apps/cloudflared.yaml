@@ -1,5 +1,3 @@
-# Uses the production tunnel UUID. Staging Argo excludes this file until
-# cutover so a parallel cluster does not steal public hostnames.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -8,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/krymancer/homelab-infra.git
+    repoURL: https://github.com/krymancer/infra.git
     targetRevision: main
     path: k8s/apps/cloudflared
   destination:

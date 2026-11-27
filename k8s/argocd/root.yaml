@@ -1,6 +1,4 @@
-# Production app-of-apps (pve VM 200 / 192.168.0.20). Staging on alt uses a
-# Terraform-applied Application (see k8s/argocd/staging-root.yaml) that excludes
-# pihole.yaml so LoadBalancer 192.168.0.20 is not stolen by a parallel cluster.
+# App-of-apps for the k3s cluster (alt VM 220 / 192.168.0.20).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -9,7 +7,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/krymancer/homelab-infra.git
+    repoURL: https://github.com/krymancer/infra.git
     targetRevision: main
     path: k8s/argocd/apps
   destination:

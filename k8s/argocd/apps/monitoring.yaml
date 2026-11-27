@@ -9,7 +9,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/krymancer/homelab-infra.git
+    repoURL: https://github.com/krymancer/infra.git
     targetRevision: main
     path: k8s/apps/monitoring/extras
   destination:
